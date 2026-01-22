@@ -80,6 +80,7 @@ function Register() {
 
   const handleRegister = async (data: RegistrationSchemaType) => {
     await dispatch(registerUser(data));
+    console.log(isLoggedIn);
     if (isLoggedIn) {
       setOpenSnackbar(true);
       setTimeout(() => router.push("/dashboard"), 1000);

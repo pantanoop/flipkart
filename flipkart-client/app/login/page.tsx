@@ -57,6 +57,7 @@ function Login() {
   });
 
   const handleLogin = async (data: LoginFormData) => {
+    console.log(data);
     await dispatch(loginUser(data));
     setOpenSnackbar(true);
     setTimeout(() => router.push("/dashboard"), 1000);
@@ -70,9 +71,9 @@ function Login() {
       googleloginUser({
         username: user.displayName,
         useremail: user.email,
-        userid: user.uid,
+        userid: Number(1234),
         role: "customer",
-        password: "123456",
+        userpassword: "123456",
       }),
     );
 
