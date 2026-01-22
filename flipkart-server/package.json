@@ -21,7 +21,11 @@
     "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js",
     "migration:run": "npm run typeorm -- migration:run -d ./data-source.ts",
     "migration:generate": "npm run typeorm -- migration:generate -d ./data-source.ts",
-    "migration:revert": "npm run typeorm -- migration:revert -d ./data-source.ts"
+    "migration:revert": "npm run typeorm -- migration:revert -d ./data-source.ts",
+    "db:create": "ts-node ./node_modules/typeorm-extension/bin/cli.cjs db:create",
+    "db:drop": "ts-node ./node_modules/typeorm-extension/bin/cli.cjs db:drop",
+    "seed:run": "ts-node ./node_modules/typeorm-extension/bin/cli.cjs seed:run",
+    "seed:create": "ts-node ./node_modules/typeorm-extension/bin/cli.cjs seed:create"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
@@ -36,7 +40,8 @@
     "mongoose": "^9.1.4",
     "pg": "^8.17.2",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "typeorm-extension": "^3.7.3"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
