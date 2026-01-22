@@ -1,0 +1,64 @@
+.register-wrapper {
+  min-height: 100vh;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.register-container {
+  width: 920px;
+  height: 560px;
+  display: flex;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0px 8px 30px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+}
+
+.register-left {
+  width: 45%;
+  background-color: #2874f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.register-left img {
+  width: 70%;
+}
+
+.register-right {
+  width: 55%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.register-card {
+  width: 100%;
+  box-shadow: none;
+}
+
+.register-subtitle {
+  font-size: 14px;
+  color: #878787;
+  margin-bottom: 16px;
+}
+
+.register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.register-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+}
+
+.google-btn {
+  margin-top: 14px;
+}
