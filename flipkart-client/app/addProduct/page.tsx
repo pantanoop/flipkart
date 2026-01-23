@@ -84,7 +84,7 @@ export default function AddProduct() {
     selectedImages.forEach((file) => {
       formData.append("images", file);
     });
-
+    console.log(formData);
     dispatch(addProduct(formData));
 
     setOpenSnackbar(true);

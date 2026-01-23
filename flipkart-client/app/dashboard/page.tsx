@@ -33,7 +33,7 @@ export default function Dashboard() {
 
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
-  const [searchCategory, setSearchCategory] = useState("");
+  const [category, setSearchCategory] = useState("");
 
   const observer = useRef<IntersectionObserver>();
 
@@ -60,11 +60,19 @@ export default function Dashboard() {
       fetchProducts({
         limit,
         skip: (page - 1) * limit,
-        searchTerm,
-        searchCategory,
+        category,
       }),
     );
-  }, [dispatch, page, searchTerm, searchCategory, limit, skip]);
+  }, [dispatch, page, searchTerm, category, limit, skip]);
+
+  function handleClickCategory(category: string) {
+    console.log("hanldeclick");
+    setSearchCategory(category);
+
+    // router.push(`/products/category=${category}`)
+  }
+
+  console.log("setted the category", category);
 
   return (
     <>
@@ -116,7 +124,7 @@ export default function Dashboard() {
               variant="outlined"
               sx={{ backgroundColor: "white" }}
               onClick={() => {
-                setSearchCategory(cat);
+                handleClickCategory(cat);
                 setPage(1);
               }}
             >
