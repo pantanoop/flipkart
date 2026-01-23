@@ -5,8 +5,6 @@ import { Product } from "./entities/product.entity";
 import { Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
 import { ProductQueryDto } from "./dto/query.dto";
-import { randomInt } from "crypto";
-import { time } from "console";
 
 @Injectable()
 export class ProductService {
@@ -15,16 +13,15 @@ export class ProductService {
     private readonly productRepository: Repository<Product>,
   ) {}
 
-  async create(createProductDto: CreateProductDto) {
-    const {
-      productname,
-      category,
-      subcategory,
-      price,
-      description,
-      photoUrl,
-      sellerid,
-    } = createProductDto;
+  async create(
+    createProductDto: CreateProductDto,
+    files: Express.Multer.File[],
+  ) {
+    const { productname, category, subcategory, price, description, sellerid } =
+      createProductDto;
+
+    const imageUrls =
+      files?.map((file) => `/uploads/products/${file.filename}`) || [];
 
     const newProduct = this.productRepository.create({
       productid: Date.now(),
@@ -33,63 +30,46 @@ export class ProductService {
       category,
       subcategory,
       description,
-      photoUrl,
+      imageUrls,
       rating: 0,
       sellerid,
     });
 
     await this.productRepository.save(newProduct);
-
     return newProduct;
   }
 
   async findAll(queryDto: ProductQueryDto) {
     const { page, limit, category, subcategory } = queryDto;
-    console.log("servicedto", queryDto);
-    let whereObj:any={};
-    if(category){
-      whereObj.category=category;
-    }
-  
-const offset = page - 1 * limit;
 
-    let products = await this.productRepository.find({
-      where:whereObj,
-      skip:offset,
-      take:limit
+    const whereObj: any = {};
+
+    if (category) whereObj.category = category;
+    if (subcategory) whereObj.subcategory = subcategory;
+
+    const offset =
+      page !== undefined && limit !== undefined
+        ? (page - 1) * limit
+        : undefined;
+
+    const [products, total] = await this.productRepository.findAndCount({
+      where: whereObj,
+      skip: offset,
+      take: limit,
     });
-    console.log("all products", products);
-    if (category) {
-      products = products.filter(
-        (p) => p.category === category,
-        // console.log("each product category", p.category);
-      );
-      console.log("category", products);
-    }
-    if (subcategory) {
-      products = products.filter((p) => p.subcategory === subcategory);
-    }
-
-    const total = products.length;
-
-    // if (limit !== undefined && page !== undefined) {
-    //   const offset = page - 1 * limit;
-    //   const paginatedproducts = await this.productRepository.find({
-    //     skip: offset,
-    //     take: limit,
-    //   });
 
     if (limit !== undefined && page !== undefined) {
-      const offset = page - 1 * limit;
-      const paginatedproducts = products.slice(offset, offset + limit);
       return {
-        paginatedproducts,
+        paginatedproducts: products,
         total,
       };
     }
+
     return {
       products,
       total,
+      skip: offset ?? 0,
+      limit: limit ?? total,
     };
   }
 
@@ -97,9 +77,11 @@ const offset = page - 1 * limit;
     const product = await this.productRepository.findOne({
       where: { productid },
     });
+
     if (!product) {
       throw new HttpException({ message: "product not found" }, 404);
     }
+
     return product;
   }
 
@@ -107,9 +89,11 @@ const offset = page - 1 * limit;
     const product = await this.productRepository.findOne({
       where: { productid },
     });
+
     if (!product) {
       throw new HttpException({ message: "product not found" }, 404);
     }
+
     await this.productRepository.update({ productid }, updateProductDto);
     return product;
   }
@@ -118,11 +102,12 @@ const offset = page - 1 * limit;
     const deletedproduct = await this.productRepository.findOne({
       where: { productid },
     });
+
     if (!deletedproduct) {
       throw new HttpException({ message: "product not found" }, 404);
     }
-    const res = await this.productRepository.delete({ productid });
-    console.log(res.affected);
+
+    await this.productRepository.delete({ productid });
     return deletedproduct;
   }
 }

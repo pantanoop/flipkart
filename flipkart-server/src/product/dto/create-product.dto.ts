@@ -7,9 +7,9 @@ import {
 } from "class-validator";
 
 export class CreateProductDto {
-  @IsNumber({}, { message: "id must be a number" })
   @IsOptional()
-  productid: number;
+  @IsNumber({}, { message: "id must be a number" })
+  productid?: number;
 
   @IsString({ message: "Title must be a string" })
   @IsNotEmpty({ message: "Title cannot be empty" })
@@ -23,20 +23,22 @@ export class CreateProductDto {
   @IsNotEmpty({ message: "Category cannot be empty" })
   category: string;
 
-  @IsString({ message: "Category must be a string" })
-  @IsNotEmpty({ message: "Category cannot be empty" })
+  @IsString({ message: "Subcategory must be a string" })
+  @IsNotEmpty({ message: "Subcategory cannot be empty" })
   subcategory: string;
 
-  @IsString({ message: "Thumbnail must be a string" })
   @IsOptional()
-  photoUrl?: string;
+  imageUrls?: string[];
 
   @IsString({ message: "Description must be a string" })
-  @Length(3, 600, { message: "Name must be between 1 and 600 characters" })
+  @Length(3, 600, {
+    message: "Description must be between 3 and 600 characters",
+  })
+  @IsOptional()
   description?: string;
 
-  @IsNumber({ maxDecimalPlaces: 1 }, { message: "Rating must be a number" })
   @IsOptional()
+  @IsNumber({ maxDecimalPlaces: 1 }, { message: "Rating must be a number" })
   rating?: number;
 
   @IsNumber({}, { message: "seller id should be a number" })

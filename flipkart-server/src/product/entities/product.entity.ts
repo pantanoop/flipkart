@@ -20,8 +20,8 @@ export class Product {
   @Column()
   subcategory: string;
 
-  @Column()
-  photoUrl: string;
+  @Column("text", { array: true })
+  imageUrls: string[];
 
   @Column("varchar", { length: 600 })
   description: string;

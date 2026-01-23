@@ -3,10 +3,10 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { findUser, createUser, googlesignin } from "../services/authApi";
 
 interface currentUser {
-  email: number;
-  password: string;
+  useremail: number;
+  userpassword: string;
   username: string;
-  uid?: string;
+  userid?: number;
   role?: string;
 }
 

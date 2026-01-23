@@ -39,8 +39,10 @@ export class Product1769063177104 implements MigrationInterface {
             type: "varchar",
           },
           {
-            name: "photoUrl",
-            type: "varchar",
+            name: "imageUrls",
+            type: "text",
+            isArray: true,
+            isNullable: true,
           },
           {
             name: "rating",
