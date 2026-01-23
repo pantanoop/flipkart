@@ -12,7 +12,6 @@ export class ProductService {
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
   ) {}
-
   async create(
     createProductDto: CreateProductDto,
     files: Express.Multer.File[],
@@ -21,7 +20,8 @@ export class ProductService {
       createProductDto;
 
     const imageUrls =
-      files?.map((file) => `/uploads/products/${file.filename}`) || [];
+      files?.map((file) => `http://localhost:5000/uploads/${file.filename}`) ||
+      [];
 
     const newProduct = this.productRepository.create({
       productid: Date.now(),
@@ -36,6 +36,7 @@ export class ProductService {
     });
 
     await this.productRepository.save(newProduct);
+    console.log("created product",newProduct);
     return newProduct;
   }
 
