@@ -48,9 +48,10 @@ export class CreateProductDto {
   sellerid: number;
 
   @IsBoolean()
-  isBanned:boolean;
+  @IsOptional()
+  isBanned: boolean;
 
-   @IsNumber()
-   @IsOptional()
-  quantity:number;
+  @IsNumber()
+  @IsOptional()
+  quantity: number;
 }

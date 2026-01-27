@@ -22,6 +22,13 @@ interface CartItem {
   quantity: number;
 }
 
+interface WishlistItem {
+  id: number;
+  productName: string;
+  price: number;
+  image: string;
+}
+
 interface ProductState {
   productData: Product[];
   selectedProduct: Product | null;
@@ -30,6 +37,7 @@ interface ProductState {
   total: number;
   limit: number;
   cart: CartItem[];
+  wishlist: WishlistItem[];
 }
 
 const initialState: ProductState = {
@@ -40,6 +48,7 @@ const initialState: ProductState = {
   total: 0,
   limit: 10,
   cart: [],
+  wishlist: [],
 };
 
 export const fetchProducts = createAsyncThunk(
@@ -62,7 +71,7 @@ export const fetchProducts = createAsyncThunk(
     },
     { rejectWithValue },
   ) => {
-    // console.log("slice", userid);
+    console.log("slice", userid);
     try {
       return await productService.getProducts({
         page,
@@ -135,8 +144,40 @@ export const deleteProduct = createAsyncThunk(
 export const banProduct = createAsyncThunk(
   "products/ban",
   async (productid: number, { rejectWithValue }) => {
+    console.log(productid);
     try {
-      return await productService.banproduct(productid);
+      return await productService.banProduct(productid);
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  },
+);
+
+export const addToWishlist = createAsyncThunk(
+  "products/addwishlist",
+  async (
+    {
+      productid,
+      userid,
+    }: {
+      productid: number;
+      userid: number;
+    },
+    { rejectWithValue },
+  ) => {
+    try {
+      return await productService.addWishlist({ productid, userid });
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  },
+);
+
+export const getWishlistItems = createAsyncThunk(
+  "products/wislist",
+  async (userid: number, { rejectWithValue }) => {
+    try {
+      return await productService.getWishlist(userid);
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || error.message);
     }
@@ -260,12 +301,33 @@ const productSlice = createSlice({
         const updated = action.payload.data;
 
         const index = state.productData.findIndex(
-          (p) => p.productid === updated.productid,
+          (p) => p.productid === updated?.productid,
         );
 
         if (index !== -1) {
           state.productData[index].isBanned = updated.isBanned;
         }
+        console.log(
+          state.productData[index]?.isBanned,
+          "product slice ban product",
+        );
+      })
+      .addCase(addToWishlist.fulfilled, () => {
+        console.log("added the product in wishlist");
+      })
+
+      .addCase(getWishlistItems.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getWishlistItems.fulfilled, (state, action) => {
+        state.loading = false;
+        console.log("slice", action.payload);
+        state.wishlist = action.payload;
+      })
+      .addCase(getWishlistItems.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
       });
   },
 });

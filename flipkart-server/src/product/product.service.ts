@@ -24,14 +24,8 @@ export class ProductService {
     createProductDto: CreateProductDto,
     files: Express.Multer.File[],
   ) {
-    const {
-      productname,
-      category,
-      subcategory,
-      price,
-      description,
-      sellerid,
-    } = createProductDto;
+    const { productname, category, subcategory, price, description, sellerid } =
+      createProductDto;
 
     const imageUrls =
       files?.map((file) => `http://localhost:5000/uploads/${file.filename}`) ||
@@ -47,8 +41,8 @@ export class ProductService {
       imageUrls,
       rating: 0,
       sellerid,
-      isBanned:false,
-      quantity:10,
+      isBanned: false,
+      quantity: 10,
     });
 
     await this.productRepository.save(newProduct);
@@ -94,12 +88,11 @@ export class ProductService {
 
     const skip = (page - 1) * limit;
 
-    const [products, total] =
-      await this.productRepository.findAndCount({
-        where: whereObj,
-        skip,
-        take: limit,
-      });
+    const [products, total] = await this.productRepository.findAndCount({
+      where: whereObj,
+      skip,
+      take: limit,
+    });
 
     return {
       data: products,
@@ -168,5 +161,20 @@ export class ProductService {
 
     await this.productRepository.delete({ productid });
     return product;
+  }
+  async banProduct(id: number) {
+    const product = await this.productRepository.findOne({
+      where: { productid: id },
+    });
+    if (!product) {
+      throw new HttpException("Product not found", 404);
+    }
+    const updatedProduct = {
+      ...product,
+      isBanned: !product.isBanned,
+    };
+    console.log(updatedProduct);
+    await this.productRepository.save(updatedProduct);
+    return updatedProduct;
   }
 }

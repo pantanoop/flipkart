@@ -6,6 +6,8 @@ import { useAppDispatch, useAppSelector } from "@/app/hooks/hooks";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import Badge from "@mui/material/Badge";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
+import FavoriteBorderOutlinedIcon from "@mui/icons-material/FavoriteBorderOutlined";
+
 import {
   deleteProduct,
   fetchProducts,
@@ -108,6 +110,7 @@ export default function Dashboard() {
   }
 
   function handleBan(productid: number) {
+    console.log("ran handle ban", productid);
     dispatch(banProduct(productid));
   }
 
@@ -140,6 +143,10 @@ export default function Dashboard() {
     router.push("/orders");
   }
 
+  function handleClickWishlist() {
+    router.push("/wishlist");
+  }
+
   return (
     <>
       <AppBar position="static" sx={{ backgroundColor: "#2874f0" }}>
@@ -160,8 +167,13 @@ export default function Dashboard() {
             </IconButton>
 
             <IconButton onClick={handleClickOrder}>
-              <Badge badgeContent={cartItems?.length || 0} color="error">
+              <Badge color="error">
                 <LocalShippingIcon sx={{ color: "white" }} />
+              </Badge>
+            </IconButton>
+            <IconButton onClick={handleClickWishlist}>
+              <Badge>
+                <FavoriteBorderOutlinedIcon sx={{ color: "pink" }} />
               </Badge>
             </IconButton>
           </Box>

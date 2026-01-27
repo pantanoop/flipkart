@@ -13,7 +13,7 @@ export const productService = {
   },
 
   async getProducts(params: any) {
-    // console.log("api hit", params);
+    console.log("api hit", params);
     const response = await axios.get(`${API_URL}/products`, { params });
     return response.data;
   },
@@ -38,7 +38,18 @@ export const productService = {
     return response.data;
   },
   async banProduct(productid: number) {
-    const response = await axios.patch(`${API_URL}/products/${productid}/ban`);
+    console.log(productid);
+    const response = await axios.put(`${API_URL}/products/${productid}/ban`);
+    return response.data;
+  },
+
+  async addWishlist(data: any) {
+    const response = await axios.post(`${API_URL}/wishlist`, data);
+    return response.data;
+  },
+
+  async getWishlist(userid: number) {
+    const response = await axios.get(`${API_URL}/wishlist/${userid}`);
     return response.data;
   },
 };

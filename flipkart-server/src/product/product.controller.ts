@@ -75,9 +75,17 @@ export class ProductController {
       storage: productImageStorage,
     }),
   )
-  update(@Param("id") id: number,@UploadedFiles() files: Express.Multer.File[], @Body() updateProductDto: UpdateProductDto) {
+  update(
+    @Param("id") id: number,
+    @UploadedFiles() files: Express.Multer.File[],
+    @Body() updateProductDto: UpdateProductDto,
+  ) {
     // console.log("hitted update",id,updateProductDto)
-    return this.productService.update(+id,updateProductDto,files);
+    return this.productService.update(+id, updateProductDto, files);
+  }
+  @Put(":id/ban")
+  banProduct(@Param("id") id: number) {
+    return this.productService.banProduct(id);
   }
 
   @Delete(":id")
@@ -86,4 +94,3 @@ export class ProductController {
     return this.productService.remove(+id);
   }
 }
-

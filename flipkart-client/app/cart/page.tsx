@@ -8,7 +8,8 @@ import { placeOrder } from "../redux/orderSlice";
 import { saveAddress } from "../redux/addressSlice";
 import AddressModal from "../components/AddressModal";
 import "./Cart.css";
-import { Button } from "@mui/material";
+import { Button, TextField } from "@mui/material";
+import { findDiscountCoupoun } from "../redux/coupounSlice";
 
 function Cart() {
   const dispatch = useDispatch<any>();
@@ -16,8 +17,10 @@ function Cart() {
 
   const cartItems = useSelector((state: any) => state.productor.cart);
   const currentUser = useSelector((state: any) => state.authenticator.c_user);
+  const currentDiscount = useSelector((state: any) => state.coupoun.discount);
 
   const [showAddressModal, setShowAddressModal] = useState(false);
+  const [coupoun_value, setCoupoun_value] = useState("");
   const [addressSaved, setAddressSaved] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [error, setError] = useState("");
@@ -26,6 +29,17 @@ function Cart() {
     (sum: number, item: any) => sum + item.price * item.quantity,
     0,
   );
+  let discountPrice;
+
+  if (currentDiscount === "10%") {
+    discountPrice = totalPrice - totalPrice * 0.1;
+  } else if (currentDiscount === "30%") {
+    discountPrice = totalPrice - totalPrice * 0.3;
+  } else if (currentDiscount === "50%") {
+    discountPrice = totalPrice - totalPrice * 0.5;
+  } else {
+    discountPrice = totalPrice;
+  }
 
   const handlePlaceOrder = () => {
     if (!currentUser) {
@@ -54,6 +68,7 @@ function Cart() {
   const handleBuyNow = async () => {
     const payload = {
       userid: currentUser.userid,
+      discountApplied: currentDiscount,
       items: cartItems.map((item: any) => ({
         productid: item.id,
         quantity: item.quantity,
@@ -69,6 +84,11 @@ function Cart() {
       setError("Order failed. Please try again.");
     }
   };
+
+  function handleApplyCoupoun() {
+    console.log("cart", coupoun_value);
+    dispatch(findDiscountCoupoun({ coupoun_name: coupoun_value }));
+  }
 
   return (
     <div className="cart">
@@ -100,11 +120,27 @@ function Cart() {
             </div>
           ))}
 
-          <h2>Total: $ {totalPrice.toFixed(2)}</h2>
+          {currentDiscount && (
+            <p style={{ color: "green" }}>Discount Applied {currentDiscount}</p>
+          )}
+          <h2>Total: $ {discountPrice?.toFixed(2)}</h2>
+
+          <TextField
+            label="ApplyDiscount"
+            value={coupoun_value}
+            onChange={(e) => setCoupoun_value(e.target.value)}
+          />
+          <Button
+            variant="contained"
+            color="success"
+            onClick={handleApplyCoupoun}
+          >
+            Apply Coupoun
+          </Button>
 
           {!addressSaved && (
             <Button variant="contained" onClick={handlePlaceOrder}>
-              Add Address
+              Buy
             </Button>
           )}
 

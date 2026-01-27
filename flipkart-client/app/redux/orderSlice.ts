@@ -6,6 +6,7 @@ export const placeOrder = createAsyncThunk(
   async (
     payload: {
       userid: number;
+      discountApplied: string;
       items: { productid: number; quantity: number }[];
     },
     { rejectWithValue },

@@ -10,7 +10,8 @@ import {
   Typography,
   Chip,
 } from "@mui/material";
-import { addToCart } from "../redux/productSlice";
+import { addToCart, addToWishlist } from "../redux/productSlice";
+import FavoriteBorderOutlinedIcon from "@mui/icons-material/FavoriteBorderOutlined";
 
 interface Product {
   productid: number;
@@ -36,6 +37,7 @@ export default function ProductCard({
   const dispatch = useAppDispatch();
 
   const role = useAppSelector((state) => state.authenticator.c_user?.role);
+  const currentuser = useAppSelector((state) => state.authenticator.c_user);
 
   const handleAddToCart = () => {
     console.log("handle cart clicked");
@@ -46,6 +48,16 @@ export default function ProductCard({
         price: product.price,
         image: product.imageUrls?.[0] || "",
         quantity: 1,
+      }),
+    );
+  };
+
+  const handleAddToWishlist = () => {
+    console.log("handle cart clicked");
+    dispatch(
+      addToWishlist({
+        productid: product.productid,
+        userid: currentuser.userid,
       }),
     );
   };
@@ -149,15 +161,26 @@ export default function ProductCard({
           </Button>
 
           {role === "customer" && !product.isBanned && (
-            <Button
-              size="small"
-              variant="contained"
-              color="primary"
-              sx={{ minWidth: 110 }}
-              onClick={handleAddToCart}
-            >
-              Add to Cart
-            </Button>
+            <>
+              <Button
+                size="small"
+                variant="contained"
+                color="primary"
+                sx={{ minWidth: 110 }}
+                onClick={handleAddToCart}
+              >
+                Add to Cart
+              </Button>
+              <Button
+                size="small"
+                // variant="contained"
+                // color="primary"
+                sx={{ minWidth: 110 }}
+                onClick={handleAddToWishlist}
+              >
+                <FavoriteBorderOutlinedIcon />
+              </Button>
+            </>
           )}
 
           {(role === "admin" || role === "seller") && (
