@@ -31,4 +31,10 @@ export class Product {
 
   @Column()
   sellerid: number;
+
+  @Column()
+  isBanned: boolean;
+
+  @Column()
+  quantity: number;
 }

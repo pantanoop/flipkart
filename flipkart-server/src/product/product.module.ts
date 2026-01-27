@@ -1,11 +1,15 @@
+/* eslint-disable */
+
 import { Module } from "@nestjs/common";
 import { ProductService } from "./product.service";
 import { ProductController } from "./product.controller";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { Product } from "./entities/product.entity";
 
+import { User } from "../auth/entities/users.entity";
+
 @Module({
-  imports: [TypeOrmModule.forFeature([Product])],
+  imports: [TypeOrmModule.forFeature([Product,User])],
   controllers: [ProductController],
   providers: [ProductService],
 })

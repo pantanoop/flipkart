@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { MigrationInterface, QueryRunner, Table } from "typeorm";
 
 export class Product1769063177104 implements MigrationInterface {
@@ -52,6 +53,16 @@ export class Product1769063177104 implements MigrationInterface {
             name: "sellerid",
             type: "bigint",
           },
+          {
+            name:"isBanned",
+            type: "boolean",
+            default:false
+          },
+          {
+            name:"quantity",
+            type: "int",
+            default:10
+          }
         ],
       }),
       true,

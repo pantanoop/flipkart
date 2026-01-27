@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { useRouter, useParams } from "next/navigation";
 
 import { useAppDispatch, useAppSelector } from "@/app/hooks/hooks";
-import { fetchProductById, updateProduct } from "../../redux/productSlice";
+import { updateProduct, fetchProductById } from "@/app/redux/productSlice";
 
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
@@ -22,67 +22,99 @@ import {
 } from "@mui/material";
 
 const ProductSchema = z.object({
-  productname: z.string().min(1),
-  category: z.string().min(1),
-  subcategory: z.string().min(1),
-  price: z.string().min(1),
+  productname: z.string().min(1, "Product name is required"),
+  category: z.string().min(1, "Category is required"),
+  subcategory: z.string().min(1, "Subcategory is required"),
+  price: z.string().min(1, "Price is required"),
   description: z.string().optional(),
-  photoUrl: z.string().optional(),
+  images: z.array(z.instanceof(File)).optional(),
 });
 
+type ProductFormData = z.infer<typeof ProductSchema>;
+
 export default function EditProduct() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
   const dispatch = useAppDispatch();
+  const router = useRouter();
+  const { id } = useParams();
 
-  const productId = Number(searchParams.get("id"));
-
-  const product = useAppSelector((state) => state.productor.selectedProduct);
-  const c_user = useAppSelector((state) => state.authenticator.c_user);
+  const { selectedProduct, loading } = useAppSelector(
+    (state) => state.productor,
+  );
 
   const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [selectedImages, setSelectedImages] = useState<File[]>([]);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
 
   const {
     control,
     handleSubmit,
+    setValue,
     reset,
     formState: { errors },
-  } = useForm({
+  } = useForm<ProductFormData>({
     resolver: zodResolver(ProductSchema),
+    defaultValues: {
+      productname: "",
+      category: "",
+      subcategory: "",
+      price: "",
+      description: "",
+      images: [],
+    },
   });
 
   useEffect(() => {
-    if (productId) {
-      dispatch(fetchProductById(Number(productId)));
+    if (id) {
+      dispatch(fetchProductById(Number(id)));
     }
-  }, [productId, dispatch]);
+  }, [id, dispatch]);
 
   useEffect(() => {
-    if (product) {
+    if (selectedProduct) {
       reset({
-        productname: product.productname,
-        category: product.category,
-        subcategory: product.subcategory,
-        price: String(product.price),
-        description: product.description,
-        photoUrl: product.photoUrl,
+        productname: selectedProduct.productname ?? "",
+        category: selectedProduct.category ?? "",
+        subcategory: selectedProduct.subcategory ?? "",
+        price: String(selectedProduct.price ?? ""),
+        description: selectedProduct.description ?? "",
+        images: [],
       });
-    }
-  }, [product, reset]);
 
-  const handleUpdateProduct = (data: any) => {
+      if (selectedProduct.photoUrl) {
+        setPreviewUrls([selectedProduct.photoUrl]);
+      }
+    }
+  }, [selectedProduct, reset]);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return;
+
+    const files = Array.from(e.target.files);
+    setSelectedImages(files);
+    setValue("images", files);
+
+    const previews = files.map((file) => URL.createObjectURL(file));
+    setPreviewUrls(previews);
+  };
+
+  const handleUpdateProduct = (data: ProductFormData) => {
+    console.log("update dta ui", data);
+    const formData = new FormData();
+
+    formData.append("productname", data.productname);
+    formData.append("category", data.category);
+    formData.append("subcategory", data.subcategory);
+    formData.append("price", data.price);
+    formData.append("description", data.description || "");
+
+    selectedImages.forEach((file) => {
+      formData.append("images", file);
+    });
+
     dispatch(
       updateProduct({
-        id: Number(productId),
-        data: {
-          productname: data.productname,
-          category: data.category,
-          subcategory: data.subcategory,
-          price: Number(data.price),
-          description: data.description,
-          photoUrl: data.photoUrl,
-          sellerid: Number(c_user?.uid),
-        },
+        productid: Number(id),
+        data: formData,
       }),
     );
 
@@ -93,6 +125,10 @@ export default function EditProduct() {
     }, 1200);
   };
 
+  if (loading) {
+    return <Typography>Loading product...</Typography>;
+  }
+
   return (
     <>
       <Card variant="outlined" sx={{ p: 4, minWidth: 380 }}>
@@ -101,8 +137,13 @@ export default function EditProduct() {
         </Typography>
 
         <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
-          <TextField label="Product ID" value={productId} disabled fullWidth />
-          <TextField label="Seller ID" value={c_user?.uid} disabled fullWidth />
+          <TextField label="Product ID" value={id} disabled fullWidth />
+          <TextField
+            label="Seller ID"
+            value={selectedProduct?.sellerid}
+            disabled
+            fullWidth
+          />
         </Box>
 
         <Box
@@ -171,11 +212,29 @@ export default function EditProduct() {
             )}
           />
 
-          <Controller
-            name="photoUrl"
-            control={control}
-            render={({ field }) => <TextField {...field} label="Photo URL" />}
-          />
+          <Button variant="outlined" component="label">
+            Change Images
+            <input
+              hidden
+              multiple
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+            />
+          </Button>
+
+          <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
+            {previewUrls.map((url, i) => (
+              <img
+                key={i}
+                src={url}
+                width={70}
+                height={70}
+                style={{ objectFit: "cover", borderRadius: 4 }}
+                alt="preview"
+              />
+            ))}
+          </Box>
 
           <Button variant="contained" type="submit" fullWidth>
             Update Product
@@ -192,9 +251,7 @@ export default function EditProduct() {
         autoHideDuration={2000}
         onClose={() => setOpenSnackbar(false)}
       >
-        <Alert severity="success" sx={{ width: "100%" }}>
-          Product updated successfully
-        </Alert>
+        <Alert severity="success">Product updated successfully ✅</Alert>
       </Snackbar>
     </>
   );

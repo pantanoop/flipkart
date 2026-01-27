@@ -1,0 +1,37 @@
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: white;
+  padding: 20px;
+  width: 350px;
+  border-radius: 8px;
+}
+
+.modal input {
+  width: 100%;
+  padding: 8px;
+  margin: 6px 0;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+}
+
+.cancel {
+  background: #ccc;
+}
+
+.confirm {
+  background: #2874f0;
+  color: white;
+}

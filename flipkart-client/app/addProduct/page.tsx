@@ -58,7 +58,7 @@ export default function AddProduct() {
       images: [],
     },
   });
-  console.log("currentUser", currentUser);
+  // console.log("currentUser", currentUser);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;

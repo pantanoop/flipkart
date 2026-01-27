@@ -17,6 +17,7 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import authReducer from "./authenticateSlice";
 import productReducer from "./productSlice";
+import orderReducer from "./orderSlice";
 import {
   persistStore,
   persistReducer,
@@ -32,7 +33,7 @@ import storage from "redux-persist/lib/storage"; // defaults to localStorage for
 const persistConfig = {
   key: "root",
   storage,
-  whitelist: ["authenticator"],
+  whitelist: ["authenticator", "productor", "order"],
 };
 
 const persistedReducer = persistReducer(
@@ -40,6 +41,7 @@ const persistedReducer = persistReducer(
   combineReducers({
     authenticator: authReducer,
     productor: productReducer,
+    order: orderReducer,
   }),
 );
 

@@ -1,9 +1,13 @@
+/* eslint-disable */
 import { HttpException, Injectable } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository, ILike } from "typeorm";
+
+import { Product } from "./entities/product.entity";
+import { User } from "../auth/entities/users.entity";
+
 import { CreateProductDto } from "./dto/create-product.dto";
 import { UpdateProductDto } from "./dto/update-product.dto";
-import { Product } from "./entities/product.entity";
-import { Repository } from "typeorm";
-import { InjectRepository } from "@nestjs/typeorm";
 import { ProductQueryDto } from "./dto/query.dto";
 
 @Injectable()
@@ -11,13 +15,23 @@ export class ProductService {
   constructor(
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
+
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
   ) {}
+
   async create(
     createProductDto: CreateProductDto,
     files: Express.Multer.File[],
   ) {
-    const { productname, category, subcategory, price, description, sellerid } =
-      createProductDto;
+    const {
+      productname,
+      category,
+      subcategory,
+      price,
+      description,
+      sellerid,
+    } = createProductDto;
 
     const imageUrls =
       files?.map((file) => `http://localhost:5000/uploads/${file.filename}`) ||
@@ -26,51 +40,77 @@ export class ProductService {
     const newProduct = this.productRepository.create({
       productid: Date.now(),
       productname,
-      price,
       category,
       subcategory,
+      price,
       description,
       imageUrls,
       rating: 0,
       sellerid,
+      isBanned:false,
+      quantity:10,
     });
 
     await this.productRepository.save(newProduct);
-    console.log("created product",newProduct);
     return newProduct;
   }
 
   async findAll(queryDto: ProductQueryDto) {
-    const { page, limit, category, subcategory } = queryDto;
+    const {
+      page = 1,
+      limit = 10,
+      category,
+      subcategory,
+      searchTerm,
+      userid,
+    } = queryDto;
 
     const whereObj: any = {};
 
     if (category) whereObj.category = category;
     if (subcategory) whereObj.subcategory = subcategory;
 
-    const offset =
-      page !== undefined && limit !== undefined
-        ? (page - 1) * limit
-        : undefined;
-
-    const [products, total] = await this.productRepository.findAndCount({
-      where: whereObj,
-      skip: offset,
-      take: limit,
-    });
-
-    if (limit !== undefined && page !== undefined) {
-      return {
-        paginatedproducts: products,
-        total,
-      };
+    if (searchTerm?.trim()) {
+      whereObj.productname = ILike(`%${searchTerm.trim()}%`);
     }
 
+    if (userid) {
+      const user = await this.userRepository.findOne({
+        where: { userid: Number(userid) },
+      });
+
+      if (!user) {
+        throw new HttpException("User not found", 404);
+      }
+
+      if (user.role === "seller") {
+        whereObj.sellerid = user.userid;
+      }
+
+      if (user.role === "customer") {
+        whereObj.isBanned = false;
+      }
+    }
+
+    const skip = (page - 1) * limit;
+
+    const [products, total] =
+      await this.productRepository.findAndCount({
+        where: whereObj,
+        skip,
+        take: limit,
+      });
+
     return {
-      products,
-      total,
-      skip: offset ?? 0,
-      limit: limit ?? total,
+      data: products,
+      meta: {
+        total,
+        page,
+        limit,
+        skip,
+        totalPages: Math.ceil(total / limit),
+        hasNextPage: skip + products.length < total,
+      },
     };
   }
 
@@ -80,35 +120,53 @@ export class ProductService {
     });
 
     if (!product) {
-      throw new HttpException({ message: "product not found" }, 404);
+      throw new HttpException("Product not found", 404);
     }
 
     return product;
   }
 
-  async update(productid: number, updateProductDto: UpdateProductDto) {
+  async update(
+    productid: number,
+    updateProductDto: UpdateProductDto,
+    files?: Express.Multer.File[],
+  ) {
     const product = await this.productRepository.findOne({
       where: { productid },
     });
 
     if (!product) {
-      throw new HttpException({ message: "product not found" }, 404);
+      throw new HttpException("Product not found", 404);
     }
 
-    await this.productRepository.update({ productid }, updateProductDto);
-    return product;
+    let imageUrls = product.imageUrls;
+
+    if (files?.length) {
+      imageUrls = files.map(
+        (file) => `http://localhost:5000/uploads/${file.filename}`,
+      );
+    }
+
+    const updatedProduct = {
+      ...product,
+      ...updateProductDto,
+      imageUrls,
+    };
+
+    await this.productRepository.save(updatedProduct);
+    return updatedProduct;
   }
 
   async remove(productid: number) {
-    const deletedproduct = await this.productRepository.findOne({
+    const product = await this.productRepository.findOne({
       where: { productid },
     });
 
-    if (!deletedproduct) {
-      throw new HttpException({ message: "product not found" }, 404);
+    if (!product) {
+      throw new HttpException("Product not found", 404);
     }
 
     await this.productRepository.delete({ productid });
-    return deletedproduct;
+    return product;
   }
 }

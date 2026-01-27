@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/app/hooks/hooks";
 import { fetchProductById } from "../../../app/redux/productSlice";
@@ -14,10 +14,13 @@ import {
   Box,
   Button,
 } from "@mui/material";
+import ArrowBackIosNewOutlinedIcon from "@mui/icons-material/ArrowBackIosNewOutlined";
+import ArrowForwardIosOutlinedIcon from "@mui/icons-material/ArrowForwardIosOutlined";
 
 export default function ProductDetailPage() {
   const { id } = useParams();
   const dispatch = useAppDispatch();
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const product = useAppSelector((state) => state.productor.selectedProduct);
 
@@ -26,6 +29,20 @@ export default function ProductDetailPage() {
       dispatch(fetchProductById(Number(id)));
     }
   }, [id, dispatch]);
+
+  const handlePrev = () => {
+    if (!product?.imageUrls) return;
+    setCurrentImageIndex((prev) =>
+      prev === 0 ? product.imageUrls.length - 1 : prev - 1,
+    );
+  };
+
+  const handleNext = () => {
+    if (!product?.imageUrls) return;
+    setCurrentImageIndex((prev) =>
+      prev === product.imageUrls.length - 1 ? 0 : prev + 1,
+    );
+  };
 
   if (!product) return <Typography>Loading...</Typography>;
 
@@ -43,15 +60,49 @@ export default function ProductDetailPage() {
             style={{ display: "flex", gap: "4px", flexWrap: "wrap" }}
           >
             {product.imageUrls && product.imageUrls.length > 0 ? (
-              product.imageUrls.map((url: any, index: any) => (
+              <Box sx={{ position: "relative", width: 400, margin: "0 auto" }}>
                 <CardMedia
-                  key={index}
                   component="img"
                   height="300"
-                  image={url}
+                  image={product.imageUrls[currentImageIndex]}
                   alt={product.productname}
+                  sx={{ borderRadius: 2 }}
                 />
-              ))
+                <Button
+                  onClick={handlePrev}
+                  sx={{
+                    position: "absolute",
+                    top: "50%",
+                    left: 0,
+                    transform: "translateY(-50%)",
+                  }}
+                >
+                  <ArrowBackIosNewOutlinedIcon
+                    sx={{
+                      fontSize: 50,
+                      color: "white",
+                      cursor: "pointer",
+                    }}
+                  />
+                </Button>
+                <Button
+                  onClick={handleNext}
+                  sx={{
+                    position: "absolute",
+                    top: "50%",
+                    right: 0,
+                    transform: "translateY(-50%)",
+                  }}
+                >
+                  <ArrowForwardIosOutlinedIcon
+                    sx={{
+                      fontSize: 50,
+                      color: "white",
+                      cursor: "pointer",
+                    }}
+                  />
+                </Button>
+              </Box>
             ) : (
               <p>No images</p>
             )}

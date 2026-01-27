@@ -1,0 +1,56 @@
+.orders {
+  padding: 20px;
+}
+
+.order-card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+  background: #fff;
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.order-items {
+  border-top: 1px solid #eee;
+  padding-top: 10px;
+}
+
+.order-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.order-footer {
+  border-top: 1px solid #eee;
+  margin-top: 10px;
+  padding-top: 10px;
+  text-align: right;
+}
+
+.status {
+  font-weight: bold;
+}
+
+.status.ordered {
+  color: orange;
+}
+
+.status.shipped {
+  color: blue;
+}
+
+.status.delivered {
+  color: green;
+}
+
+.status.cancelled {
+  color: red;
+}

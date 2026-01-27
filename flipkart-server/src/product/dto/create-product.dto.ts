@@ -1,4 +1,6 @@
+/* eslint-disable */
 import {
+  IsBoolean,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -44,4 +46,11 @@ export class CreateProductDto {
   @IsNumber({}, { message: "seller id should be a number" })
   @IsNotEmpty({ message: "seller id cant be empty" })
   sellerid: number;
+
+  @IsBoolean()
+  isBanned:boolean;
+
+   @IsNumber()
+   @IsOptional()
+  quantity:number;
 }

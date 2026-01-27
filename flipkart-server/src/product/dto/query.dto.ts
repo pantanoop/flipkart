@@ -11,9 +11,17 @@ export class ProductQueryDto {
 
   @IsNumber()
   @IsOptional()
-  page: number = 1;
+  page: number;
 
   @IsOptional()
   @IsString()
   subcategory: string;
+
+  @IsOptional()
+  @IsString()
+  searchTerm: string;
+
+  @IsOptional()
+  @IsString()
+  userid: number;
 }

@@ -11,6 +11,15 @@ export interface Product {
   imageUrls: string[];
   rating?: number;
   sellerid: number;
+  isBanned?: boolean;
+}
+
+interface CartItem {
+  id: number;
+  productName: string;
+  price: number;
+  image: string;
+  quantity: number;
 }
 
 interface ProductState {
@@ -19,8 +28,8 @@ interface ProductState {
   loading: boolean;
   error: string | null;
   total: number;
-  skip: number;
   limit: number;
+  cart: CartItem[];
 }
 
 const initialState: ProductState = {
@@ -29,40 +38,40 @@ const initialState: ProductState = {
   loading: false,
   error: null,
   total: 0,
-  skip: 0,
   limit: 10,
+  cart: [],
 };
 
 export const fetchProducts = createAsyncThunk(
   "products/fetch",
   async (
     {
-      page,
-      limit,
+      page = 1,
+      limit = 10,
       category,
       subcategory,
+      searchTerm,
+      userid,
     }: {
       page?: number;
       limit?: number;
       category?: string;
       subcategory?: string;
+      searchTerm?: string;
+      userid?: number;
     },
     { rejectWithValue },
   ) => {
+    // console.log("slice", userid);
     try {
-      const data = await productService.getProducts({
-        page: page ?? 1,
-        limit: limit ?? 10,
+      return await productService.getProducts({
+        page,
+        limit,
         category,
         subcategory,
+        searchTerm,
+        userid,
       });
-
-      return {
-        products: data.paginatedproducts ?? data.products,
-        total: data.total,
-        page: page ?? 1,
-        limit: limit ?? 10,
-      };
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || error.message);
     }
@@ -99,12 +108,12 @@ export const updateProduct = createAsyncThunk(
       data,
     }: {
       productid: number;
-      data: any;
+      data: FormData;
     },
     { rejectWithValue },
   ) => {
     try {
-      return await productService.updateProduct(productid, data);
+      return await productService.update(productid, data);
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || error.message);
     }
@@ -123,6 +132,17 @@ export const deleteProduct = createAsyncThunk(
   },
 );
 
+export const banProduct = createAsyncThunk(
+  "products/ban",
+  async (productid: number, { rejectWithValue }) => {
+    try {
+      return await productService.banproduct(productid);
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  },
+);
+
 const productSlice = createSlice({
   name: "products",
   initialState,
@@ -130,32 +150,75 @@ const productSlice = createSlice({
     clearProducts: (state) => {
       state.productData = [];
       state.total = 0;
-      state.page = 1;
-      state.limit = 10;
       state.error = null;
+    },
+    addToCart: (state, action) => {
+      const item = action.payload;
+      console.log("product slice", item);
+
+      const existing = state.cart.find((p) => p.id === item.id);
+
+      if (existing) {
+        existing.quantity += 1;
+      } else {
+        state.cart.push({ ...item, quantity: 1 });
+      }
+      console.log("add to cart", state.cart);
+    },
+
+    increaseQty: (state, action) => {
+      const item = state.cart.find((p) => p.id === action.payload);
+      if (item) {
+        item.quantity += 1;
+      }
+    },
+
+    decreaseQty: (state, action) => {
+      const item = state.cart.find((p) => p.id === action.payload);
+      if (item) {
+        if (item.quantity > 1) {
+          item.quantity -= 1;
+        } else {
+          state.cart = state.cart.filter((p) => p.id !== action.payload);
+        }
+      }
+    },
+
+    clearCart: (state) => {
+      state.cart = [];
     },
   },
   extraReducers: (builder) => {
     builder
-
       .addCase(fetchProducts.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(fetchProducts.fulfilled, (state, action) => {
+        // console.log("slice", action.payload);
         state.loading = false;
-        state.productData = action.payload.products;
-        state.total = action.payload.total;
-        state.page = action.payload.page;
-        state.limit = action.payload.limit;
+
+        const { data, meta } = action.payload;
+
+        if (meta.page === 1) {
+          state.productData = data;
+        } else {
+          const existingIds = new Set(
+            state.productData.map((p) => p.productid),
+          );
+          const newProducts = data.filter(
+            (p: any) => !existingIds.has(p.productid),
+          );
+          state.productData.push(...newProducts);
+        }
+
+        state.total = meta.total;
+        state.limit = meta.limit;
       })
       .addCase(fetchProducts.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
-        state.productData = [];
-        state.total = 0;
       })
-
       .addCase(fetchProductById.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -169,23 +232,11 @@ const productSlice = createSlice({
         state.error = action.payload as string;
         state.selectedProduct = null;
       })
-
-      .addCase(addProduct.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
       .addCase(addProduct.fulfilled, (state, action) => {
-        state.loading = false;
         state.productData.unshift(action.payload);
         state.total += 1;
       })
-      .addCase(addProduct.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload as string;
-      })
-
       .addCase(updateProduct.fulfilled, (state, action) => {
-        state.loading = false;
         const index = state.productData.findIndex(
           (p) => p.productid === action.payload.productid,
         );
@@ -199,16 +250,26 @@ const productSlice = createSlice({
           state.selectedProduct = action.payload;
         }
       })
-
       .addCase(deleteProduct.fulfilled, (state, action) => {
-        state.loading = false;
         state.productData = state.productData.filter(
           (p) => p.productid !== action.payload,
         );
-        state.total = state.total - 1;
+        state.total -= 1;
+      })
+      .addCase(banProduct.fulfilled, (state, action) => {
+        const updated = action.payload.data;
+
+        const index = state.productData.findIndex(
+          (p) => p.productid === updated.productid,
+        );
+
+        if (index !== -1) {
+          state.productData[index].isBanned = updated.isBanned;
+        }
       });
   },
 });
 
-export const { clearProducts } = productSlice.actions;
+export const { clearProducts, clearCart, addToCart, increaseQty, decreaseQty } =
+  productSlice.actions;
 export default productSlice.reducer;

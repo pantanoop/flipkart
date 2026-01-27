@@ -35,7 +35,7 @@ export class Auth1768996098004 implements MigrationInterface {
           {
             name: "role",
             type: "varchar",
-            default: "'user'",
+            default: "customer",
           },
           {
             name: "createdAt",

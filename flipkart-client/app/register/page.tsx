@@ -34,7 +34,7 @@ import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { useAppDispatch, useAppSelector } from "../hooks/hooks";
 import { googleloginUser, registerUser } from "../redux/authenticateSlice";
 
-const RoleSchema = z.enum(["customer", "seller", "admin"]);
+const RoleSchema = z.enum(["customer", "seller"]);
 
 const RegistrationSchema = z
   .object({
@@ -213,7 +213,6 @@ function Register() {
                       <Select {...field} label="Role">
                         <MenuItem value="customer">Customer</MenuItem>
                         <MenuItem value="seller">Seller</MenuItem>
-                        <MenuItem value="admin">Admin</MenuItem>
                       </Select>
                     </FormControl>
                   )}

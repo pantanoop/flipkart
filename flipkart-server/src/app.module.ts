@@ -6,20 +6,11 @@ import { ProductModule } from "./product/product.module";
 
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { ConfigModule, ConfigService } from "@nestjs/config";
-
-import { ServeStaticModule } from "@nestjs/serve-static";
-// import { join } from "path";
-
-// import { FileUploadModule } from "./shared/file-upload/file-upload.module";
+import { OrderModule } from './order/order.module';
+import { AddressModule } from './address/address.module';
 
 @Module({
   imports: [
-    // ServeStaticModule.forRoot({
-    //   rootPath: join(__dirname, "..", "uploads"),
-    //   serveRoot: "/uploads",
-    // }),
-
-    
     ConfigModule.forRoot({ isGlobal: true }),
 
     TypeOrmModule.forRootAsync({
@@ -39,6 +30,8 @@ import { ServeStaticModule } from "@nestjs/serve-static";
 
     AuthModule,
     ProductModule,
+    OrderModule,
+    AddressModule,
   ],
   controllers: [AppController],
   providers: [AppService],

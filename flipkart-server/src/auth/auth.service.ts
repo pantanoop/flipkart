@@ -49,11 +49,11 @@ export class AuthService {
 
   async findUser(loginAuthDto: LoginAuthDto) {
     const { useremail, userpassword } = loginAuthDto;
-    console.log({ useremail, userpassword });
+    // console.log({ useremail, userpassword });
     const existingUser = await this.userRepository.findOne({
       where: { useremail, userpassword },
     });
-    console.log(existingUser);
+    // console.log(existingUser);
     if (!existingUser) {
       throw new HttpException({ message: "Invalid credentials" }, 404);
     }
