@@ -17,13 +17,16 @@ export const findUser = async (credentials: any) => {
 
 export const createUser = async (credentials: any) => {
   console.log(credentials);
-  const response = await fetch(`${API_BASE_URL}/auth/register`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
+  const response = await fetch(
+    `https://flipkart-server-ashy.vercel.app/auth/register`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(credentials),
     },
-    body: JSON.stringify(credentials),
-  });
+  );
   if (!response.ok) {
     throw new Error(`Response status: ${response.status}`);
   }
