@@ -42,3 +42,37 @@ export const googlesignin = async (newcredentials: any) => {
   }
   return response.json();
 };
+
+export const getUsers = async ({
+  page,
+  limit,
+}: {
+  page: number;
+  limit: number;
+}) => {
+  const res = await fetch(
+    `http://localhost:5000/auth/users?page=${page}&limit=${limit}`,
+  );
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch users");
+  }
+
+  return res.json();
+};
+
+export const toggleBanUser = async (userid: number) => {
+  console.log(userid);
+  const response = await fetch(`http://localhost:5000/auth/ban/${userid}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Response status: ${response.status}`);
+  }
+
+  return response.json();
+};

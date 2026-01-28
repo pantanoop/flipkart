@@ -54,15 +54,14 @@ export class Product1769063177104 implements MigrationInterface {
             type: "bigint",
           },
           {
-            name:"isBanned",
+            name: "isBanned",
             type: "boolean",
-            default:false
+            default: false,
           },
           {
-            name:"quantity",
+            name: "quantity",
             type: "int",
-            default:10
-          }
+          },
         ],
       }),
       true,

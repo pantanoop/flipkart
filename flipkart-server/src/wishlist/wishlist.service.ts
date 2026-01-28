@@ -1,6 +1,6 @@
-import { Injectable } from "@nestjs/common";
+import { HttpException, Injectable } from "@nestjs/common";
 import { CreateWishlistDto } from "./dto/create-wishlist.dto";
-import { UpdateWishlistDto } from "./dto/update-wishlist.dto";
+
 import { InjectRepository } from "@nestjs/typeorm";
 import { Product } from "src/product/entities/product.entity";
 import { Repository } from "typeorm";
@@ -56,28 +56,19 @@ export class WishlistService {
     return products;
   }
 
-  // findOne(id: number) {
-  //   return `This action returns a #${id} wishlist`;
-  // }
+  async remove(productid: number, userid: number) {
+    console.log("Removing wishlist:", productid, userid);
 
-  update(id: number, updateWishlistDto: UpdateWishlistDto) {
-    return `This action updates a #${id} wishlist`;
+    const item = await this.wishlistRepo.findOne({
+      where: { productid, userid },
+    });
+
+    if (!item) {
+      throw new HttpException("Product not found in wishlist", 404);
+    }
+
+    await this.wishlistRepo.delete({ productid, userid });
+
+    return { message: "Removed from wishlist", productid };
   }
-
-  // remove(id: number) {
-  //   return `This action removes a #${id} wishlist`;
-  // }
-
-  // async remove(productid: number,userid:number) {
-  //     const item = await this.wishlistRepo.findOne({
-  //       where: { userid:userid && productid:productid},
-  //     });
-
-  //     if (!item) {
-  //       throw new HttpException("Product not found", 404);
-  //     }
-
-  //     await this.wishlistRepo.delete({ productid });
-  //     return ;
-  //   }
 }

@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import NextLink from "next/link";
 import { useRouter } from "next/navigation";
@@ -57,7 +58,6 @@ function Login() {
   });
 
   const handleLogin = async (data: LoginFormData) => {
-    console.log(data);
     await dispatch(loginUser(data));
     setOpenSnackbar(true);
     setTimeout(() => router.push("/dashboard"), 1000);
@@ -91,14 +91,12 @@ function Login() {
               alt="Flipkart"
             />
           </div>
-
           <div className="login-right">
             <Card className="login-card">
               <Typography variant="h5">Login</Typography>
               <Typography className="login-subtitle">
                 Get access to your Orders, Wishlist and Recommendations
               </Typography>
-
               <Box
                 component="form"
                 onSubmit={handleSubmit(handleLogin)}
@@ -107,20 +105,27 @@ function Login() {
                 <Controller
                   name="useremail"
                   control={control}
-                  render={({ field }) => (
-                    <TextField {...field} label="Email" fullWidth />
+                  render={({ field, fieldState }) => (
+                    <TextField
+                      {...field}
+                      label="Email"
+                      fullWidth
+                      error={!!fieldState.error}
+                      helperText={fieldState.error?.message}
+                    />
                   )}
                 />
-
                 <Controller
                   name="userpassword"
                   control={control}
-                  render={({ field }) => (
+                  render={({ field, fieldState }) => (
                     <TextField
                       {...field}
                       label="Password"
                       type={showPassword ? "text" : "password"}
                       fullWidth
+                      error={!!fieldState.error}
+                      helperText={fieldState.error?.message}
                       InputProps={{
                         endAdornment: (
                           <InputAdornment position="end">
@@ -139,17 +144,14 @@ function Login() {
                     />
                   )}
                 />
-
                 <div className="login-actions">
                   <Button type="submit" variant="contained">
                     Login
                   </Button>
-
                   <NextLink href="/register">
                     <Button variant="outlined">Sign up</Button>
                   </NextLink>
                 </div>
-
                 <Button
                   onClick={signInWithGoogle}
                   variant="outlined"
@@ -163,7 +165,6 @@ function Login() {
           </div>
         </div>
       </div>
-
       <Snackbar open={openSnackbar} autoHideDuration={2000}>
         <Alert severity="success">Login successful 🎉</Alert>
       </Snackbar>

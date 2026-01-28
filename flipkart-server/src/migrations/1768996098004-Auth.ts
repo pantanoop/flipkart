@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { MigrationInterface, QueryRunner, Table } from "typeorm";
 
 export class Auth1768996098004 implements MigrationInterface {
@@ -35,17 +36,12 @@ export class Auth1768996098004 implements MigrationInterface {
           {
             name: "role",
             type: "varchar",
-            default: "customer",
+            default: "'customer'",
           },
           {
-            name: "createdAt",
-            type: "timestamp",
-            default: "now()",
-          },
-          {
-            name: "updatedAt",
-            type: "timestamp",
-            default: "now()",
+            name: "isBanned",
+            type: "boolean",
+            default: false,
           },
         ],
       }),

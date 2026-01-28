@@ -29,6 +29,7 @@ function Cart() {
     (sum: number, item: any) => sum + item.price * item.quantity,
     0,
   );
+
   let discountPrice;
 
   if (currentDiscount === "10%") {
@@ -86,79 +87,99 @@ function Cart() {
   };
 
   function handleApplyCoupoun() {
-    console.log("cart", coupoun_value);
     dispatch(findDiscountCoupoun({ coupoun_name: coupoun_value }));
   }
 
   return (
-    <div className="cart">
-      <h1>🛒 Your Cart</h1>
+    <div className="cart-container">
+      <h1 className="cart-title">🛒 Your Cart</h1>
 
       {cartItems.length === 0 ? (
-        <p>No items in cart</p>
+        <p className="empty-cart">No items in cart</p>
       ) : (
         <>
-          {cartItems.map((item: any) => (
-            <div className="cart-item" key={item.id}>
-              <div className="cart-details">
-                <img src={item.image} className="cart-img" />
-                <h3>{item.productName}</h3>
-                <p>$ {item.price}</p>
+          <div className="cart-list">
+            {cartItems.map((item: any) => (
+              <div className="cart-item" key={item.id}>
+                <div className="cart-left">
+                  <img src={item.image} className="cart-img" />
+                  <div className="cart-info">
+                    <h3>{item.productName}</h3>
+                    <p>$ {item.price}</p>
 
-                <div className="cart-qty">
-                  <button onClick={() => dispatch(decreaseQty(item.id))}>
-                    -
-                  </button>
-                  <span>{item.quantity}</span>
-                  <button onClick={() => dispatch(increaseQty(item.id))}>
-                    +
-                  </button>
+                    <div className="cart-qty">
+                      <button onClick={() => dispatch(decreaseQty(item.id))}>
+                        -
+                      </button>
+                      <span>{item.quantity}</span>
+                      <button onClick={() => dispatch(increaseQty(item.id))}>
+                        +
+                      </button>
+                    </div>
+                  </div>
                 </div>
+
+                <h4 className="cart-price">
+                  $ {(item.price * item.quantity).toFixed(2)}
+                </h4>
               </div>
+            ))}
+          </div>
 
-              <h4>$ {(item.price * item.quantity).toFixed(2)}</h4>
+          <div className="cart-summary">
+            {currentDiscount && (
+              <p className="discount-text">
+                Discount Applied {currentDiscount}
+              </p>
+            )}
+
+            <h2>Total: $ {discountPrice?.toFixed(2)}</h2>
+
+            <div className="coupon-box">
+              <TextField
+                label="ApplyDiscount"
+                value={coupoun_value}
+                onChange={(e) => setCoupoun_value(e.target.value)}
+                fullWidth
+              />
+              <Button
+                variant="contained"
+                color="success"
+                onClick={handleApplyCoupoun}
+              >
+                Apply Coupon
+              </Button>
             </div>
-          ))}
 
-          {currentDiscount && (
-            <p style={{ color: "green" }}>Discount Applied {currentDiscount}</p>
-          )}
-          <h2>Total: $ {discountPrice?.toFixed(2)}</h2>
+            {!addressSaved && (
+              <Button variant="contained" onClick={handlePlaceOrder} fullWidth>
+                Buy
+              </Button>
+            )}
 
-          <TextField
-            label="ApplyDiscount"
-            value={coupoun_value}
-            onChange={(e) => setCoupoun_value(e.target.value)}
-          />
-          <Button
-            variant="contained"
-            color="success"
-            onClick={handleApplyCoupoun}
-          >
-            Apply Coupoun
-          </Button>
+            {addressSaved && !orderPlaced && (
+              <Button
+                variant="contained"
+                color="success"
+                onClick={handleBuyNow}
+                fullWidth
+              >
+                Proceed to Buy
+              </Button>
+            )}
 
-          {!addressSaved && (
-            <Button variant="contained" onClick={handlePlaceOrder}>
-              Buy
-            </Button>
-          )}
+            {orderPlaced && (
+              <h3 className="success-text">✅ Order placed successfully!</h3>
+            )}
 
-          {addressSaved && !orderPlaced && (
-            <Button variant="contained" color="success" onClick={handleBuyNow}>
-              Proceed to Buy
-            </Button>
-          )}
-
-          {orderPlaced && (
-            <h3 style={{ color: "green" }}>✅ Order placed successfully!</h3>
-          )}
-
-          {error && <p style={{ color: "red" }}>{error}</p>}
+            {error && <p className="error-text">{error}</p>}
+          </div>
         </>
       )}
 
-      <Button onClick={() => router.push("/dashboard")}>Home</Button>
+      <Button className="home-btn" onClick={() => router.push("/dashboard")}>
+        Home
+      </Button>
 
       <AddressModal
         open={showAddressModal}

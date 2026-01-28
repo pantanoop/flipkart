@@ -1,23 +1,38 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 // import { authService } from "@/app/services/auth.service";
-import { findUser, createUser, googlesignin } from "../services/authApi";
+import {
+  findUser,
+  createUser,
+  googlesignin,
+  toggleBanUser,
+  getUsers,
+} from "../services/authApi";
 
-interface currentUser {
-  useremail: number;
-  userpassword: string;
+interface User {
+  useremail: string;
+  userpassword?: string;
   username: string;
-  userid?: number;
+  userid: number;
   role?: string;
+  isBanned?: boolean;
 }
 
 interface UserState {
-  c_user: currentUser | null;
+  users: User[];
+  total: number;
+  page: number;
+  limit: number;
+  c_user: User | null;
   loading: boolean;
   error: string | null;
   isLoggedIn: boolean;
 }
 
 const initialState: UserState = {
+  users: [],
+  total: 0,
+  page: 1,
+  limit: 5,
   c_user: null,
   loading: false,
   error: null,
@@ -62,8 +77,33 @@ export const googleloginUser = createAsyncThunk(
   },
 );
 
+export const fetchUsers = createAsyncThunk(
+  "auth/fetchUsers",
+  async (
+    { page, limit }: { page: number; limit: number },
+    { rejectWithValue },
+  ) => {
+    try {
+      return await getUsers({ page, limit });
+    } catch (err: any) {
+      return rejectWithValue(err.message);
+    }
+  },
+);
+
+export const toggleUserBan = createAsyncThunk(
+  "user/toggleBan",
+  async (userid: number, { rejectWithValue }) => {
+    try {
+      return await toggleBanUser(userid);
+    } catch (error: any) {
+      return rejectWithValue(error.message);
+    }
+  },
+);
+
 const authSlice = createSlice({
-  name: "products",
+  name: "auth",
   initialState,
   reducers: {
     logout: (state) => {
@@ -112,6 +152,29 @@ const authSlice = createSlice({
         state.error = action.payload as string;
         state.c_user = null;
         state.isLoggedIn = false;
+      })
+      .addCase(fetchUsers.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchUsers.fulfilled, (state, action) => {
+        state.loading = false;
+        state.users.push(...action.payload.data);
+        state.total = action.payload.total;
+      })
+      .addCase(fetchUsers.rejected, (state) => {
+        state.loading = false;
+      })
+      .addCase(toggleUserBan.fulfilled, (state, action) => {
+        console.log(action.payload);
+        const updatedUser = action.payload;
+
+        const index = state.users.findIndex(
+          (u) => u.userid === updatedUser.userid,
+        );
+
+        if (index !== -1) {
+          state.users[index].isBanned = updatedUser.isBanned;
+        }
       });
   },
 });

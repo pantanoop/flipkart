@@ -30,19 +30,20 @@ export class WishlistController {
   //   return this.wishlistService.findOne(+id);
   // }
 
-  @Patch(":id")
-  update(
-    @Param("id") id: string,
-    @Body() updateWishlistDto: UpdateWishlistDto,
-  ) {
-    return this.wishlistService.update(+id, updateWishlistDto);
-  }
-
-  // @Delete(":productid/:userid")
-  // remove(
-  //   @Param("productid") productid: number,
-  //   @Param("userid") userid: number,
+  // @Patch(":id")
+  // update(
+  //   @Param("id") id: string,
+  //   @Body() updateWishlistDto: UpdateWishlistDto,
   // ) {
-  //   return this.wishlistService.remove(productid, userid);
+  //   return this.wishlistService.update(+id, updateWishlistDto);
   // }
+
+  @Delete(":productid/:userid")
+  remove(
+    @Param("productid") productid: string,
+    @Param("userid") userid: string,
+  ) {
+    console.log("controller hit");
+    return this.wishlistService.remove(Number(productid), Number(userid));
+  }
 }

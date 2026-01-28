@@ -54,6 +54,10 @@ export class ProductController {
     @UploadedFiles() files: Express.Multer.File[],
     @Body() createProductDto: CreateProductDto,
   ) {
+    if (createProductDto.quantity !== undefined) {
+      createProductDto.quantity = Number(createProductDto.quantity);
+    }
+
     return this.productService.create(createProductDto, files);
   }
 

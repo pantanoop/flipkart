@@ -52,4 +52,11 @@ export const productService = {
     const response = await axios.get(`${API_URL}/wishlist/${userid}`);
     return response.data;
   },
+  async removeWishlist(productid: number, userid: number) {
+    console.log("productid", productid, "userid", userid);
+    const response = await axios.delete(
+      `${API_URL}/wishlist/${productid}/${userid}`,
+    );
+    return response.data;
+  },
 };

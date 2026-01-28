@@ -1,4 +1,10 @@
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import {
+  IsBoolean,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from "class-validator";
 
 export class CreateAuthDto {
   @IsNumber({}, { message: "id must be a number" })
@@ -20,4 +26,8 @@ export class CreateAuthDto {
   @IsString({ message: "role must be a string" })
   @IsOptional()
   role: string;
+
+  @IsBoolean()
+  @IsOptional()
+  isBanned: boolean;
 }

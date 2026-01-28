@@ -21,11 +21,16 @@ import {
   Alert,
 } from "@mui/material";
 
+import "./AddProduct.css";
+
 const ProductSchema = z.object({
   productname: z.string().min(1, "Product name is required"),
   category: z.string().min(1, "Category is required"),
   subcategory: z.string().min(1, "Subcategory is required"),
   price: z.string().min(1, "Price is required"),
+  quantity: z.coerce
+    .number({ invalid_type_error: "Quantity must be a number" })
+    .min(1, "Quantity must be at least 1"),
   description: z.string().optional(),
   images: z.array(z.instanceof(File)).optional(),
 });
@@ -54,11 +59,11 @@ export default function AddProduct() {
       category: "",
       subcategory: "",
       price: "",
+      quantity: 1,
       description: "",
       images: [],
     },
   });
-  // console.log("currentUser", currentUser);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
@@ -78,13 +83,14 @@ export default function AddProduct() {
     formData.append("category", data.category);
     formData.append("subcategory", data.subcategory);
     formData.append("price", data.price);
+    formData.append("quantity", String(data.quantity));
     formData.append("description", data.description || "");
     formData.append("sellerid", String(currentUser?.userid));
 
     selectedImages.forEach((file) => {
       formData.append("images", file);
     });
-    console.log(formData);
+
     dispatch(addProduct(formData));
 
     setOpenSnackbar(true);
@@ -96,120 +102,131 @@ export default function AddProduct() {
 
   return (
     <>
-      <Card variant="outlined" sx={{ p: 4, minWidth: 380 }}>
-        <Typography variant="h5" textAlign="center" mb={2}>
-          Add Product
-        </Typography>
+      <div className="add-product-container">
+        <Card variant="outlined" className="add-product-card">
+          <Typography variant="h5" className="add-product-title">
+            Add Product
+          </Typography>
 
-        <Box
-          component="form"
-          onSubmit={handleSubmit(handleAddProduct)}
-          sx={{ display: "flex", flexDirection: "column", gap: 2 }}
-        >
-          <Controller
-            name="productname"
-            control={control}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                value={field.value ?? ""}
-                label="Product Name"
-                error={!!errors.productname}
-                helperText={errors.productname?.message}
-              />
-            )}
-          />
-
-          <Controller
-            name="category"
-            control={control}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                value={field.value ?? ""}
-                label="Category"
-                error={!!errors.category}
-                helperText={errors.category?.message}
-              />
-            )}
-          />
-
-          <Controller
-            name="subcategory"
-            control={control}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                value={field.value ?? ""}
-                label="Subcategory"
-                error={!!errors.subcategory}
-                helperText={errors.subcategory?.message}
-              />
-            )}
-          />
-
-          <Controller
-            name="price"
-            control={control}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                value={field.value ?? ""}
-                label="Price"
-                type="number"
-                error={!!errors.price}
-                helperText={errors.price?.message}
-              />
-            )}
-          />
-
-          <Controller
-            name="description"
-            control={control}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                value={field.value ?? ""}
-                label="Description"
-                multiline
-                rows={3}
-              />
-            )}
-          />
-
-          <Button variant="outlined" component="label">
-            Select Images
-            <input
-              hidden
-              multiple
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
+          <Box
+            component="form"
+            onSubmit={handleSubmit(handleAddProduct)}
+            className="add-product-form"
+          >
+            <Controller
+              name="productname"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  value={field.value ?? ""}
+                  label="Product Name"
+                  error={!!errors.productname}
+                  helperText={errors.productname?.message}
+                />
+              )}
             />
-          </Button>
 
-          <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-            {previewUrls.map((url, i) => (
-              <img
-                key={i}
-                src={url}
-                width={70}
-                height={70}
-                style={{ objectFit: "cover", borderRadius: 4 }}
-                alt="preview"
+            <Controller
+              name="category"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  value={field.value ?? ""}
+                  label="Category"
+                  error={!!errors.category}
+                  helperText={errors.category?.message}
+                />
+              )}
+            />
+
+            <Controller
+              name="subcategory"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  value={field.value ?? ""}
+                  label="Subcategory"
+                  error={!!errors.subcategory}
+                  helperText={errors.subcategory?.message}
+                />
+              )}
+            />
+
+            <Controller
+              name="price"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  value={field.value ?? ""}
+                  label="Price"
+                  type="number"
+                  error={!!errors.price}
+                  helperText={errors.price?.message}
+                />
+              )}
+            />
+
+            <Controller
+              name="quantity"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  value={field.value ?? 1}
+                  label="Quantity"
+                  type="number"
+                  error={!!errors.quantity}
+                  helperText={errors.quantity?.message}
+                  inputProps={{ min: 1 }}
+                />
+              )}
+            />
+
+            <Controller
+              name="description"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  value={field.value ?? ""}
+                  label="Description"
+                  multiline
+                  rows={3}
+                />
+              )}
+            />
+
+            <Button variant="outlined" component="label" className="image-btn">
+              Select Images
+              <input
+                hidden
+                multiple
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
               />
-            ))}
+            </Button>
+
+            <div className="image-preview">
+              {previewUrls.map((url, i) => (
+                <img key={i} src={url} alt="preview" />
+              ))}
+            </div>
+
+            <Button variant="contained" type="submit" fullWidth>
+              Add Product
+            </Button>
           </Box>
 
-          <Button variant="contained" type="submit" fullWidth>
-            Add Product
-          </Button>
-        </Box>
-
-        <Typography variant="body2" align="center" mt={2}>
-          Back to Dashboard? <Link href="/dashboard">Dashboard</Link>
-        </Typography>
-      </Card>
+          <Typography variant="body2" align="center" className="back-link">
+            Back to Dashboard? <Link href="/dashboard">Dashboard</Link>
+          </Typography>
+        </Card>
+      </div>
 
       <Snackbar
         open={openSnackbar}

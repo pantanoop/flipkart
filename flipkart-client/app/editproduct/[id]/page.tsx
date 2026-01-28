@@ -21,11 +21,16 @@ import {
   Alert,
 } from "@mui/material";
 
+import "./edit_product.css";
+
 const ProductSchema = z.object({
   productname: z.string().min(1, "Product name is required"),
   category: z.string().min(1, "Category is required"),
   subcategory: z.string().min(1, "Subcategory is required"),
   price: z.string().min(1, "Price is required"),
+  quantity: z.coerce
+    .number({ invalid_type_error: "Quantity must be a number" })
+    .min(1, "Quantity must be at least 1"),
   description: z.string().optional(),
   images: z.array(z.instanceof(File)).optional(),
 });
@@ -98,13 +103,13 @@ export default function EditProduct() {
   };
 
   const handleUpdateProduct = (data: ProductFormData) => {
-    console.log("update dta ui", data);
     const formData = new FormData();
 
     formData.append("productname", data.productname);
     formData.append("category", data.category);
     formData.append("subcategory", data.subcategory);
     formData.append("price", data.price);
+    formData.append("quantity", String(data.quantity));
     formData.append("description", data.description || "");
 
     selectedImages.forEach((file) => {
@@ -131,120 +136,131 @@ export default function EditProduct() {
 
   return (
     <>
-      <Card variant="outlined" sx={{ p: 4, minWidth: 380 }}>
-        <Typography variant="h5" textAlign="center" mb={2}>
-          Edit Product
-        </Typography>
+      <div className="edit-product-container">
+        <Card variant="outlined" className="edit-product-card">
+          <Typography variant="h5" className="edit-product-title">
+            Edit Product
+          </Typography>
 
-        <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
-          <TextField label="Product ID" value={id} disabled fullWidth />
-          <TextField
-            label="Seller ID"
-            value={selectedProduct?.sellerid}
-            disabled
-            fullWidth
-          />
-        </Box>
-
-        <Box
-          component="form"
-          onSubmit={handleSubmit(handleUpdateProduct)}
-          sx={{ display: "flex", flexDirection: "column", gap: 2 }}
-        >
-          <Controller
-            name="productname"
-            control={control}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                label="Product Name"
-                error={!!errors.productname}
-                helperText={errors.productname?.message}
-              />
-            )}
-          />
-
-          <Controller
-            name="category"
-            control={control}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                label="Category"
-                error={!!errors.category}
-                helperText={errors.category?.message}
-              />
-            )}
-          />
-
-          <Controller
-            name="subcategory"
-            control={control}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                label="Subcategory"
-                error={!!errors.subcategory}
-                helperText={errors.subcategory?.message}
-              />
-            )}
-          />
-
-          <Controller
-            name="price"
-            control={control}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                label="Price"
-                type="number"
-                error={!!errors.price}
-                helperText={errors.price?.message}
-              />
-            )}
-          />
-
-          <Controller
-            name="description"
-            control={control}
-            render={({ field }) => (
-              <TextField {...field} label="Description" multiline rows={3} />
-            )}
-          />
-
-          <Button variant="outlined" component="label">
-            Change Images
-            <input
-              hidden
-              multiple
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
+          <div className="edit-product-meta">
+            <TextField label="Product ID" value={id} disabled fullWidth />
+            <TextField
+              label="Seller ID"
+              value={selectedProduct?.sellerid}
+              disabled
+              fullWidth
             />
-          </Button>
+          </div>
 
-          <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-            {previewUrls.map((url, i) => (
-              <img
-                key={i}
-                src={url}
-                width={70}
-                height={70}
-                style={{ objectFit: "cover", borderRadius: 4 }}
-                alt="preview"
+          <Box
+            component="form"
+            onSubmit={handleSubmit(handleUpdateProduct)}
+            className="edit-product-form"
+          >
+            <Controller
+              name="productname"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Product Name"
+                  error={!!errors.productname}
+                  helperText={errors.productname?.message}
+                />
+              )}
+            />
+
+            <Controller
+              name="category"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Category"
+                  error={!!errors.category}
+                  helperText={errors.category?.message}
+                />
+              )}
+            />
+
+            <Controller
+              name="subcategory"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Subcategory"
+                  error={!!errors.subcategory}
+                  helperText={errors.subcategory?.message}
+                />
+              )}
+            />
+
+            <Controller
+              name="price"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Price"
+                  type="number"
+                  error={!!errors.price}
+                  helperText={errors.price?.message}
+                />
+              )}
+            />
+
+            <Controller
+              name="quantity"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  value={field.value ?? 1}
+                  label="Quantity"
+                  type="number"
+                  error={!!errors.quantity}
+                  helperText={errors.quantity?.message}
+                  inputProps={{ min: 1 }}
+                />
+              )}
+            />
+
+            <Controller
+              name="description"
+              control={control}
+              render={({ field }) => (
+                <TextField {...field} label="Description" multiline rows={3} />
+              )}
+            />
+
+            <Button variant="outlined" component="label" className="image-btn">
+              Change Images
+              <input
+                hidden
+                multiple
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
               />
-            ))}
+            </Button>
+
+            <div className="image-preview">
+              {previewUrls.map((url, i) => (
+                <img key={i} src={url} alt="preview" />
+              ))}
+            </div>
+
+            <Button variant="contained" type="submit" fullWidth>
+              Update Product
+            </Button>
           </Box>
 
-          <Button variant="contained" type="submit" fullWidth>
-            Update Product
-          </Button>
-        </Box>
-
-        <Typography variant="body2" align="center" mt={2}>
-          Back to Dashboard? <Link href="/dashboard">Dashboard</Link>
-        </Typography>
-      </Card>
+          <Typography variant="body2" align="center" className="back-link">
+            Back to Dashboard? <Link href="/dashboard">Dashboard</Link>
+          </Typography>
+        </Card>
+      </div>
 
       <Snackbar
         open={openSnackbar}

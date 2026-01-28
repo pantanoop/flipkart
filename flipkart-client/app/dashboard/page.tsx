@@ -43,6 +43,7 @@ export default function Dashboard() {
   const dispatch = useAppDispatch();
 
   const { isLoggedIn, c_user } = useAppSelector((state) => state.authenticator);
+  const wishlist = useAppSelector((state) => state.productor.wishlist);
 
   const { productData, total, limit, loading } = useAppSelector(
     (state) => state.productor,
@@ -103,7 +104,15 @@ export default function Dashboard() {
         userid: Number(c_user?.userid),
       }),
     );
-  }, [dispatch, page, limit, category, subcategory, debouncedSearchTerm]);
+  }, [
+    dispatch,
+    page,
+    limit,
+    category,
+    subcategory,
+    debouncedSearchTerm,
+    wishlist,
+  ]);
 
   function handleDelete(productid: number) {
     dispatch(deleteProduct(productid));
@@ -128,12 +137,13 @@ export default function Dashboard() {
     setSubcategory("");
     setSearchTerm("");
     setDebouncedSearchTerm("");
-    dispatch(clearProducts());
+    // dispatch(clearProducts());
     router.push("/dashboard");
   }
 
   function handleLogout() {
     dispatch(logout());
+    dispatch(clearProducts());
   }
 
   function handleCartClick() {
@@ -160,20 +170,24 @@ export default function Dashboard() {
               Flipkart
             </Typography>
 
-            <IconButton onClick={handleCartClick}>
-              <Badge badgeContent={cartItems?.length || 0} color="error">
-                <ShoppingCartIcon sx={{ color: "white" }} />
-              </Badge>
-            </IconButton>
+            {c_user?.role === "customer" && (
+              <>
+                <IconButton onClick={handleCartClick}>
+                  <Badge badgeContent={cartItems?.length || 0} color="error">
+                    <ShoppingCartIcon sx={{ color: "white" }} />
+                  </Badge>
+                </IconButton>
+                <IconButton onClick={handleClickWishlist}>
+                  <Badge>
+                    <FavoriteBorderOutlinedIcon sx={{ color: "pink" }} />
+                  </Badge>
+                </IconButton>
+              </>
+            )}
 
             <IconButton onClick={handleClickOrder}>
               <Badge color="error">
                 <LocalShippingIcon sx={{ color: "white" }} />
-              </Badge>
-            </IconButton>
-            <IconButton onClick={handleClickWishlist}>
-              <Badge>
-                <FavoriteBorderOutlinedIcon sx={{ color: "pink" }} />
               </Badge>
             </IconButton>
           </Box>
@@ -245,7 +259,6 @@ export default function Dashboard() {
           </Box>
         )}
       </AppBar>
-
       {(c_user?.role === "admin" || c_user?.role === "seller") && (
         <Box sx={{ p: 2, display: "flex", justifyContent: "flex-end" }}>
           <Button
@@ -256,7 +269,13 @@ export default function Dashboard() {
           </Button>
         </Box>
       )}
-
+      {c_user?.role === "admin" && (
+        <Box sx={{ p: 2, display: "flex", justifyContent: "flex-end" }}>
+          <Button variant="contained" onClick={() => router.push("/users")}>
+            User List
+          </Button>
+        </Box>
+      )}
       <Container sx={{ mt: 4 }}>
         <Grid container spacing={3}>
           {productData.map((product: any, index: any) => {

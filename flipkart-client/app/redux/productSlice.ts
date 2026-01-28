@@ -184,6 +184,21 @@ export const getWishlistItems = createAsyncThunk(
   },
 );
 
+export const removeFromWishlist = createAsyncThunk(
+  "products/removeWishlist",
+  async (
+    { productid, userid }: { productid: number; userid: number },
+    { rejectWithValue },
+  ) => {
+    try {
+      await productService.removeWishlist(productid, userid);
+      return productid;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  },
+);
+
 const productSlice = createSlice({
   name: "products",
   initialState,
@@ -298,7 +313,8 @@ const productSlice = createSlice({
         state.total -= 1;
       })
       .addCase(banProduct.fulfilled, (state, action) => {
-        const updated = action.payload.data;
+        console.log(action.payload);
+        const updated = action.payload;
 
         const index = state.productData.findIndex(
           (p) => p.productid === updated?.productid,
@@ -307,13 +323,9 @@ const productSlice = createSlice({
         if (index !== -1) {
           state.productData[index].isBanned = updated.isBanned;
         }
-        console.log(
-          state.productData[index]?.isBanned,
-          "product slice ban product",
-        );
       })
-      .addCase(addToWishlist.fulfilled, () => {
-        console.log("added the product in wishlist");
+      .addCase(addToWishlist.fulfilled, (state, action) => {
+        state.wishlist.push(action.payload);
       })
 
       .addCase(getWishlistItems.pending, (state) => {
@@ -328,6 +340,12 @@ const productSlice = createSlice({
       .addCase(getWishlistItems.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
+      })
+      .addCase(removeFromWishlist.fulfilled, (state, action) => {
+        console.log(action.payload);
+        state.wishlist = state.wishlist.filter(
+          (item) => item.id !== action.payload,
+        );
       });
   },
 });

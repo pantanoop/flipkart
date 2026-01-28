@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import NextLink from "next/link";
 import { useRouter } from "next/navigation";
@@ -38,14 +39,14 @@ const RoleSchema = z.enum(["customer", "seller"]);
 
 const RegistrationSchema = z
   .object({
-    username: z.string().min(3),
-    useremail: z.string().email(),
+    username: z.string().min(3, "Username must be at least 3 characters"),
+    useremail: z.string().email("Invalid email"),
     role: RoleSchema,
-    userpassword: z.string().min(6),
-    userconfirmpassword: z.string().min(1),
+    userpassword: z.string().min(6, "Password must be at least 6 characters"),
+    userconfirmpassword: z.string().min(1, "Confirm your password"),
   })
   .refine((data) => data.userpassword === data.userconfirmpassword, {
-    path: ["confirmpassword"],
+    path: ["userconfirmpassword"],
     message: "Passwords do not match",
   });
 
@@ -80,7 +81,6 @@ function Register() {
 
   const handleRegister = async (data: RegistrationSchemaType) => {
     await dispatch(registerUser(data));
-    console.log(isLoggedIn);
     if (isLoggedIn) {
       setOpenSnackbar(true);
       setTimeout(() => router.push("/dashboard"), 1000);
@@ -133,28 +133,42 @@ function Register() {
                 <Controller
                   name="username"
                   control={control}
-                  render={({ field }) => (
-                    <TextField {...field} label="Username" fullWidth />
+                  render={({ field, fieldState }) => (
+                    <TextField
+                      {...field}
+                      label="Username"
+                      fullWidth
+                      error={!!fieldState.error}
+                      helperText={fieldState.error?.message}
+                    />
                   )}
                 />
 
                 <Controller
                   name="useremail"
                   control={control}
-                  render={({ field }) => (
-                    <TextField {...field} label="Email" fullWidth />
+                  render={({ field, fieldState }) => (
+                    <TextField
+                      {...field}
+                      label="Email"
+                      fullWidth
+                      error={!!fieldState.error}
+                      helperText={fieldState.error?.message}
+                    />
                   )}
                 />
 
                 <Controller
                   name="userpassword"
                   control={control}
-                  render={({ field }) => (
+                  render={({ field, fieldState }) => (
                     <TextField
                       {...field}
                       label="Password"
                       type={showPassword ? "text" : "password"}
                       fullWidth
+                      error={!!fieldState.error}
+                      helperText={fieldState.error?.message}
                       InputProps={{
                         endAdornment: (
                           <InputAdornment position="end">
@@ -177,12 +191,14 @@ function Register() {
                 <Controller
                   name="userconfirmpassword"
                   control={control}
-                  render={({ field }) => (
+                  render={({ field, fieldState }) => (
                     <TextField
                       {...field}
                       label="Confirm Password"
                       type={showConfirmPassword ? "text" : "password"}
                       fullWidth
+                      error={!!fieldState.error}
+                      helperText={fieldState.error?.message}
                       InputProps={{
                         endAdornment: (
                           <InputAdornment position="end">
@@ -207,13 +223,18 @@ function Register() {
                 <Controller
                   name="role"
                   control={control}
-                  render={({ field }) => (
-                    <FormControl fullWidth>
+                  render={({ field, fieldState }) => (
+                    <FormControl fullWidth error={!!fieldState.error}>
                       <InputLabel>Role</InputLabel>
                       <Select {...field} label="Role">
                         <MenuItem value="customer">Customer</MenuItem>
                         <MenuItem value="seller">Seller</MenuItem>
                       </Select>
+                      {fieldState.error && (
+                        <Typography variant="caption" color="error">
+                          {fieldState.error.message}
+                        </Typography>
+                      )}
                     </FormControl>
                   )}
                 />
@@ -222,7 +243,6 @@ function Register() {
                   <Button type="submit" variant="contained">
                     Sign Up
                   </Button>
-
                   <NextLink href="/login">
                     <Button variant="outlined">Login</Button>
                   </NextLink>

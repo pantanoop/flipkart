@@ -9,9 +9,15 @@ import {
   CardContent,
   Typography,
   Chip,
+  IconButton,
 } from "@mui/material";
-import { addToCart, addToWishlist } from "../redux/productSlice";
+import {
+  addToCart,
+  addToWishlist,
+  removeFromWishlist,
+} from "../redux/productSlice";
 import FavoriteBorderOutlinedIcon from "@mui/icons-material/FavoriteBorderOutlined";
+import FavoriteIcon from "@mui/icons-material/Favorite";
 
 interface Product {
   productid: number;
@@ -38,9 +44,13 @@ export default function ProductCard({
 
   const role = useAppSelector((state) => state.authenticator.c_user?.role);
   const currentuser = useAppSelector((state) => state.authenticator.c_user);
+  const wishlist = useAppSelector((state) => state.productor.wishlist);
+
+  const isWishlisted = wishlist?.some(
+    (item: any) => item.productid === product.productid,
+  );
 
   const handleAddToCart = () => {
-    console.log("handle cart clicked");
     dispatch(
       addToCart({
         id: product.productid,
@@ -53,7 +63,8 @@ export default function ProductCard({
   };
 
   const handleAddToWishlist = () => {
-    console.log("handle cart clicked");
+    if (isWishlisted) return;
+    console.log("hitted add to wishlist");
     dispatch(
       addToWishlist({
         productid: product.productid,
@@ -61,13 +72,24 @@ export default function ProductCard({
       }),
     );
   };
+  const handleRemoveFromWishlist = () => {
+    console.log("hitted remove to wishlist");
+
+    dispatch(
+      removeFromWishlist({
+        productid: product.productid,
+        userid: currentuser.userid,
+      }),
+    );
+  };
 
   return (
-    <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+    <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
       <Card
         sx={{
-          width: 320,
-          height: 500,
+          width: "100%",
+          maxWidth: 340,
+          minHeight: 480,
           display: "flex",
           flexDirection: "column",
           borderRadius: 3,
@@ -84,8 +106,7 @@ export default function ProductCard({
         <Box
           sx={{
             position: "relative",
-            height: 260,
-            overflow: "hidden",
+            height: { xs: 220, sm: 250 },
             backgroundColor: "#f5f5f5",
           }}
         >
@@ -97,11 +118,36 @@ export default function ProductCard({
               sx={{
                 position: "absolute",
                 top: 8,
-                right: 8,
+                left: 8,
                 zIndex: 2,
                 fontWeight: "bold",
               }}
             />
+          )}
+          {role === "customer" && !product.isBanned && (
+            <IconButton
+              onClick={() => {
+                if (isWishlisted) {
+                  handleRemoveFromWishlist();
+                } else {
+                  handleAddToWishlist();
+                }
+              }}
+              sx={{
+                position: "absolute",
+                top: 8,
+                right: 8,
+                zIndex: 2,
+                backgroundColor: "white",
+                "&:hover": { backgroundColor: "#ffe6ee" },
+              }}
+            >
+              {isWishlisted ? (
+                <FavoriteIcon sx={{ color: "#e91e63" }} />
+              ) : (
+                <FavoriteBorderOutlinedIcon sx={{ color: "#e91e63" }} />
+              )}
+            </IconButton>
           )}
 
           {product.imageUrls?.length ? (
@@ -109,15 +155,7 @@ export default function ProductCard({
               component="img"
               src={product.imageUrls[0]}
               alt={product.productname}
-              sx={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-                transition: "transform 0.4s ease",
-                "&:hover": {
-                  transform: "scale(1.08)",
-                },
-              }}
+              sx={{ width: "100%", height: "100%", objectFit: "cover" }}
             />
           ) : (
             <Box
@@ -138,77 +176,64 @@ export default function ProductCard({
           <Typography variant="h6" noWrap fontWeight={600}>
             {product.productname}
           </Typography>
-          <Typography sx={{ mt: 0.5 }}>$ {product.price}</Typography>
+          <Typography sx={{ mt: 0.5, fontWeight: 500 }}>
+            $ {product.price}
+          </Typography>
           <Typography sx={{ mt: 0.5 }}>⭐ {product.rating ?? 0}</Typography>
         </CardContent>
 
         <Box
           sx={{
             display: "flex",
-            flexWrap: "wrap",
+            flexDirection: { xs: "column", sm: "row" },
             gap: 1,
             p: 2,
-            justifyContent: "space-between",
           }}
         >
           <Button
-            size="small"
             variant="contained"
-            sx={{ minWidth: 90 }}
+            fullWidth
             onClick={() => router.push(`/product/${product.productid}`)}
           >
             View
           </Button>
 
           {role === "customer" && !product.isBanned && (
-            <>
-              <Button
-                size="small"
-                variant="contained"
-                color="primary"
-                sx={{ minWidth: 110 }}
-                onClick={handleAddToCart}
-              >
-                Add to Cart
-              </Button>
-              <Button
-                size="small"
-                // variant="contained"
-                // color="primary"
-                sx={{ minWidth: 110 }}
-                onClick={handleAddToWishlist}
-              >
-                <FavoriteBorderOutlinedIcon />
-              </Button>
-            </>
+            <Button
+              variant="contained"
+              color="primary"
+              fullWidth
+              onClick={handleAddToCart}
+            >
+              Add to Cart
+            </Button>
           )}
 
           {(role === "admin" || role === "seller") && (
             <>
               <Button
-                size="small"
                 variant="contained"
                 color="error"
-                sx={{ minWidth: 90 }}
+                fullWidth
                 onClick={() => handleDelete?.(product.productid)}
               >
                 Delete
               </Button>
 
               <Button
-                size="small"
                 variant="outlined"
-                sx={{ minWidth: 80 }}
+                fullWidth
                 onClick={() => router.push(`/editproduct/${product.productid}`)}
               >
                 Edit
               </Button>
             </>
           )}
+        </Box>
 
-          {role === "admin" && (
+        {role === "admin" && (
+          <Box sx={{ px: 2, pb: 2 }}>
             <Button
-              size="small"
               variant="outlined"
               color="success"
               fullWidth
@@ -216,8 +241,8 @@ export default function ProductCard({
             >
               {product.isBanned ? "Unban" : "Ban"}
             </Button>
-          )}
-        </Box>
+          </Box>
+        )}
       </Card>
     </Box>
   );

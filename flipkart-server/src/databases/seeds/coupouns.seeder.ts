@@ -1,12 +1,10 @@
-import { Seeder, SeederFactoryManager } from "typeorm-extension";
+/* eslint-disable */
+import { Seeder } from "typeorm-extension";
 import { DataSource } from "typeorm";
 import { Coupoun } from "../../coupouns/entities/coupoun.entity";
 
 export default class CoupounSeeder implements Seeder {
-  public async run(
-    dataSource: DataSource,
-    factoryManager: SeederFactoryManager,
-  ): Promise<any> {
+  public async run(dataSource: DataSource): Promise<any> {
     const repository = dataSource.getRepository(Coupoun);
     await repository.insert([
       {
@@ -22,8 +20,5 @@ export default class CoupounSeeder implements Seeder {
         discount_offered: "50%",
       },
     ]);
-
-    // const userFactory = factoryManager.get(User);
-    // await userFactory.saveMany(5);
   }
 }
