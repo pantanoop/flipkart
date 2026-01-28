@@ -23,11 +23,12 @@ export default function UsersList() {
   const { users, total, loading } = useSelector(
     (state: any) => state.authenticator,
   );
+  console.log(users, "ui ");
 
   const [page, setPage] = useState(1);
 
   const observer = useRef<IntersectionObserver | null>(null);
-  const hasMore = users.length < total;
+  const hasMore = users?.length < total;
 
   const lastUserRef = useCallback(
     (node: HTMLDivElement | null) => {
@@ -64,8 +65,8 @@ export default function UsersList() {
       </div>
 
       <div className="users-list">
-        {users.map((user: any, index: number) => {
-          const isLast = index === users.length - 1;
+        {users?.map((user: any, index: number) => {
+          const isLast = index === users?.length - 1;
 
           return (
             <Paper

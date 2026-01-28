@@ -18,6 +18,7 @@ import {
 } from "../redux/productSlice";
 import FavoriteBorderOutlinedIcon from "@mui/icons-material/FavoriteBorderOutlined";
 import FavoriteIcon from "@mui/icons-material/Favorite";
+import { useEffect } from "react";
 
 interface Product {
   productid: number;
@@ -49,6 +50,9 @@ export default function ProductCard({
   const isWishlisted = wishlist?.some(
     (item: any) => item.productid === product.productid,
   );
+
+  // useEffect(() => {
+  // }, [wishlist]);
 
   const handleAddToCart = () => {
     dispatch(

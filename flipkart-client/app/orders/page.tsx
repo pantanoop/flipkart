@@ -9,7 +9,7 @@ import {
   fetchAllOrdersAdmin,
   cancelOrder,
 } from "../redux/orderSlice";
-import { Button } from "@mui/material";
+import { Box, Button, Step, StepLabel, Stepper } from "@mui/material";
 import "./Orders.css";
 
 function Orders() {
@@ -22,7 +22,7 @@ function Orders() {
     loading,
     error,
   } = useSelector((state: any) => state.order);
-
+  console.log(orders);
   useEffect(() => {
     if (!currentUser) {
       router.push("/login");
@@ -43,6 +43,22 @@ function Orders() {
       }),
     );
   };
+
+  const getStepIndex = (status: string) => {
+    switch (status) {
+      case "ORDERED":
+        return 0;
+      case "SHIPPED":
+        return 1;
+      case "DISPATCHED":
+        return 2;
+      case "DELIVERED":
+        return 3;
+      default:
+        return 0;
+    }
+  };
+
   if (loading) return <p>Loading orders...</p>;
   if (error) return <p style={{ color: "red" }}>{error}</p>;
 
@@ -58,9 +74,32 @@ function Orders() {
             className="order-card"
             key={order.orderid ?? `order-${orderIndex}`} // unique key
           >
+            <Box sx={{ mb: 6 }}>
+              <Stepper
+                activeStep={getStepIndex(order.status)}
+                alternativeLabel
+                sx={{
+                  "& .MuiStepLabel-root .Mui-completed": { color: "#1976D2" },
+                  "& .MuiStepLabel-root .Mui-active": { color: "#1976D2" },
+                }}
+              >
+                <Step>
+                  <StepLabel>ORDERED</StepLabel>
+                </Step>
+                <Step>
+                  <StepLabel>SHIPPED</StepLabel>
+                </Step>
+                <Step>
+                  <StepLabel>Dispatched</StepLabel>
+                </Step>
+                <Step>
+                  <StepLabel>DELIVERED</StepLabel>
+                </Step>
+              </Stepper>
+            </Box>
             <div className="order-header">
               <div>
-                <strong>Order ID:</strong> {order.orderid ?? "N/A"}
+                <strong>Order Id:</strong> {order.orderid ?? "N/A"}
               </div>
               <div>
                 <strong>Status:</strong>{" "}
@@ -100,7 +139,7 @@ function Orders() {
                     key={`${order.orderid}-${item.id ?? itemIndex}`}
                   >
                     <p>
-                      <strong>Product ID:</strong> {item.productid ?? "N/A"}
+                      <strong>Product Id:</strong> {item.productid ?? "N/A"}
                     </p>
                     <p>Qty: {item.quantity ?? 0}</p>
                     <p>Price: $ {item.priceAtPurchase?.toFixed(2) ?? "0.00"}</p>

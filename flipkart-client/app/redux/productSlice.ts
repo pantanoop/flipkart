@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { productService } from "../services/productApi";
+import Wishlist from "../wishlist/page";
 
 export interface Product {
   productid: number;
@@ -346,6 +347,7 @@ const productSlice = createSlice({
         state.wishlist = state.wishlist.filter(
           (item) => item.id !== action.payload,
         );
+        console.log(state.wishlist);
       });
   },
 });

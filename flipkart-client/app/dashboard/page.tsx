@@ -7,6 +7,10 @@ import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import Badge from "@mui/material/Badge";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import FavoriteBorderOutlinedIcon from "@mui/icons-material/FavoriteBorderOutlined";
+import { fetchImagesThunk } from "../redux/imageSlice";
+import React from "react";
+import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a loader
+import { Carousel } from "react-responsive-carousel";
 
 import {
   deleteProduct,
@@ -38,6 +42,11 @@ const subcategoriesMap = {
   toys: ["card games", "computer games", "board games"],
 };
 
+interface Image {
+  id: number;
+  url: string;
+}
+
 export default function Dashboard() {
   const router = useRouter();
   const dispatch = useAppDispatch();
@@ -55,9 +64,37 @@ export default function Dashboard() {
   const [subcategory, setSubcategory] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+  const images = useAppSelector((state) => state.image.images as Image[]);
 
   const observer = useRef<IntersectionObserver | null>(null);
   const hasMore = productData.length < total;
+
+  useEffect(() => {
+    console.log("corosel useffect hit in dashboard");
+    dispatch(fetchImagesThunk());
+  }, [dispatch]);
+
+  const [carouselIndex, setCarouselIndex] = useState(0);
+  const visibleItems = Math.min(4, images?.length);
+
+  const prevSlide = () => setCarouselIndex((prev) => Math.max(prev - 1, 0));
+
+  const nextSlide = () =>
+    setCarouselIndex((prev) =>
+      Math.min(prev + 1, images.length - visibleItems),
+    );
+
+  useEffect(() => {
+    if (images?.length === 0) return;
+
+    const interval = setInterval(() => {
+      setCarouselIndex((prev) =>
+        prev < images?.length - visibleItems ? prev + 1 : 0,
+      );
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [images, visibleItems]);
 
   const lastProductRef = useCallback(
     (node: HTMLDivElement | null) => {
@@ -276,6 +313,36 @@ export default function Dashboard() {
           </Button>
         </Box>
       )}
+
+      {images?.length > 0 && (
+        <Carousel
+          showArrows={true}
+          infiniteLoop={true}
+          autoPlay={true}
+          interval={1000} // time in milliseconds
+          showThumbs={false} // hide the thumbnail navigation
+          useKeyboardArrows={true}
+          // sx={{ mt: 7 }}
+        >
+          {images.map((img) => (
+            <div key={img.id}>
+              <div>
+                <img
+                  style={{
+                    objectFit: "fill",
+                    width: "100%",
+                    height: "600px",
+                    marginTop: "40px",
+                  }}
+                  src={img.url}
+                  alt="carousel"
+                />
+              </div>
+            </div>
+          ))}
+        </Carousel>
+      )}
+
       <Container sx={{ mt: 4 }}>
         <Grid container spacing={3}>
           {productData.map((product: any, index: any) => {

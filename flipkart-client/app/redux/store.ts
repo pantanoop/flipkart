@@ -19,6 +19,7 @@ import authReducer from "./authenticateSlice";
 import productReducer from "./productSlice";
 import orderReducer from "./orderSlice";
 import coupounReducer from "./coupounSlice";
+import imageReducer from "./imageSlice";
 import {
   persistStore,
   persistReducer,
@@ -44,6 +45,7 @@ const persistedReducer = persistReducer(
     productor: productReducer,
     order: orderReducer,
     coupoun: coupounReducer,
+    image: imageReducer,
   }),
 );
 
