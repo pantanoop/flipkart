@@ -1,6 +1,7 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 export const saveAddress = createAsyncThunk(
   "address/save",
   async (
@@ -15,7 +16,7 @@ export const saveAddress = createAsyncThunk(
     { rejectWithValue },
   ) => {
     try {
-      const res = await axios.post("http://localhost:5000/address", payload);
+      const res = await axios.post(`${API_BASE_URL}/address`, payload);
       return res.data;
     } catch (err: any) {
       return rejectWithValue(err.response?.data?.message);

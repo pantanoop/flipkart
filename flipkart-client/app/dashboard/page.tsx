@@ -8,7 +8,6 @@ import Badge from "@mui/material/Badge";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import FavoriteBorderOutlinedIcon from "@mui/icons-material/FavoriteBorderOutlined";
 import { fetchImagesThunk } from "../redux/imageSlice";
-import React from "react";
 import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a loader
 import { Carousel } from "react-responsive-carousel";
 

@@ -1,6 +1,8 @@
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
 export const findUser = async (credentials: any) => {
   console.log(credentials);
-  const response = await fetch("http://localhost:5000/auth/login", {
+  const response = await fetch(`${API_BASE_URL}/auth/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -15,7 +17,7 @@ export const findUser = async (credentials: any) => {
 
 export const createUser = async (credentials: any) => {
   console.log(credentials);
-  const response = await fetch("http://localhost:5000/auth/register", {
+  const response = await fetch(`${API_BASE_URL}auth/register`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -30,7 +32,7 @@ export const createUser = async (credentials: any) => {
 
 export const googlesignin = async (newcredentials: any) => {
   console.log(newcredentials);
-  const response = await fetch("http://localhost:5000/auth/login/google", {
+  const response = await fetch(`${API_BASE_URL}/auth/login/google`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -51,7 +53,7 @@ export const getUsers = async ({
   limit: number;
 }) => {
   const res = await fetch(
-    `http://localhost:5000/auth/users?page=${page}&limit=${limit}`,
+    `${API_BASE_URL}/auth/users?page=${page}&limit=${limit}`,
   );
 
   if (!res.ok) {
@@ -63,7 +65,7 @@ export const getUsers = async ({
 
 export const toggleBanUser = async (userid: number) => {
   console.log(userid);
-  const response = await fetch(`http://localhost:5000/auth/ban/${userid}`, {
+  const response = await fetch(`${API_BASE_URL}/auth/ban/${userid}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",

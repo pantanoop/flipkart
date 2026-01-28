@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 export const placeOrder = createAsyncThunk(
   "order/placeOrder",
   async (
@@ -12,7 +13,7 @@ export const placeOrder = createAsyncThunk(
     { rejectWithValue },
   ) => {
     try {
-      const res = await axios.post("http://localhost:5000/orders", payload);
+      const res = await axios.post(`${API_BASE_URL}/orders`, payload);
       return res.data;
     } catch (err: any) {
       return rejectWithValue(err.response?.data?.message || "Order failed");
@@ -25,9 +26,7 @@ export const fetchUserOrders = createAsyncThunk(
   async (userid: number, { rejectWithValue }) => {
     console.log("hitted order fetch", userid);
     try {
-      const res = await axios.get(
-        `http://localhost:5000/orders/user/${userid}`,
-      );
+      const res = await axios.get(`${API_BASE_URL}/orders/user/${userid}`);
       return res.data;
     } catch (err: any) {
       return rejectWithValue(err.response?.data?.message);
@@ -38,9 +37,7 @@ export const fetchSellerOrders = createAsyncThunk(
   "order/fetchSellerOrders",
   async (sellerid: number, { rejectWithValue }) => {
     try {
-      const res = await axios.get(
-        `http://localhost:5000/orders/seller/${sellerid}`,
-      );
+      const res = await axios.get(`${API_BASE_URL}/orders/seller/${sellerid}`);
       return res.data;
     } catch (err: any) {
       return rejectWithValue(
@@ -54,7 +51,7 @@ export const fetchAllOrdersAdmin = createAsyncThunk(
   "order/fetchAllOrdersAdmin",
   async (_, { rejectWithValue }) => {
     try {
-      const res = await axios.get("http://localhost:5000/orders/admin/all");
+      const res = await axios.get(`${API_BASE_URL}/orders/admin/all`);
       return res.data;
     } catch (err: any) {
       return rejectWithValue(err.response?.data?.message);
@@ -67,7 +64,7 @@ export const cancelOrder = createAsyncThunk(
   async (payload: { orderid: string; userid: number }, { rejectWithValue }) => {
     try {
       const res = await axios.patch(
-        `http://localhost:5000/orders/${payload.orderid}/cancel`,
+        `${API_BASE_URL}/orders/${payload.orderid}/cancel`,
         { userid: payload.userid },
       );
       return res.data;

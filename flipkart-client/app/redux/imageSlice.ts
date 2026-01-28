@@ -1,12 +1,13 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 export const fetchImagesThunk = createAsyncThunk(
   "image/fetchImages",
   async (_, { rejectWithValue }) => {
     console.log("slice corosal hit");
     try {
-      const res = await axios.get("http://localhost:5000/image");
+      const res = await axios.get(`${API_BASE_URL}/image`);
       return res.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data || "Failed to fetch images");
