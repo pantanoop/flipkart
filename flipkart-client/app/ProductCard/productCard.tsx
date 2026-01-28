@@ -67,8 +67,12 @@ export default function ProductCard({
   };
 
   const handleAddToWishlist = () => {
+    if (!currentuser) {
+      alert("Please login to add items to your wishlist");
+      return;
+    }
     if (isWishlisted) return;
-    console.log("hitted add to wishlist");
+
     dispatch(
       addToWishlist({
         productid: product.productid,
@@ -78,6 +82,10 @@ export default function ProductCard({
   };
   const handleRemoveFromWishlist = () => {
     console.log("hitted remove to wishlist");
+    if (!currentuser) {
+      alert("Please login to add items to your wishlist");
+      return;
+    }
 
     dispatch(
       removeFromWishlist({

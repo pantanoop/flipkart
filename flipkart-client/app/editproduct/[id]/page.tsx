@@ -85,8 +85,11 @@ export default function EditProduct() {
         images: [],
       });
 
-      if (selectedProduct.photoUrl) {
-        setPreviewUrls([selectedProduct.photoUrl]);
+      if (
+        selectedProduct.imageUrls &&
+        Array.isArray(selectedProduct.imageUrls)
+      ) {
+        setPreviewUrls(selectedProduct.imageUrls);
       }
     }
   }, [selectedProduct, reset]);

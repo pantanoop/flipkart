@@ -76,6 +76,10 @@ function Wishlist() {
   }, [currentUser]);
 
   const handleRemove = (productid: number) => {
+    if (!currentUser) {
+      alert("Please login to add items to your wishlist");
+      return;
+    }
     dispatch(
       removeFromWishlist({
         productid,
